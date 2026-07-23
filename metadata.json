@@ -1,0 +1,6 @@
+{
+  "name": "Perfmon SQL Analyzer - S&A Data Analysis Hub",
+  "description": "Centro de herramientas de análisis Perfmon SQL para Módulos SII y TGR con interpretación de logs, gráficos interactivos con Chart.js y alertas de rendimiento.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

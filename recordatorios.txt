@@ -1,0 +1,7 @@
+#Para hacer correr el servidor: node node_modules\vite\bin\vite.js
+
+#Para ordenar la sangria o identación: Shift + Alt + F
+
+#Subir cambios a github:  git add.
+                          git commit -m "..."
+                          git push origin main

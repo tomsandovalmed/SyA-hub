@@ -1,0 +1,50 @@
+# ==========================================
+# Dependencias y Paquetes
+# ==========================================
+node_modules/
+.pnpm-store/
+bun.lockb
+
+# ==========================================
+# Archivos de Compilación / Output
+# ==========================================
+dist/
+build/
+coverage/
+
+# ==========================================
+# Variables de Entorno y Secretos
+# ==========================================
+.env*
+!.env.example
+
+# ==========================================
+# Herramientas de IA y Caché Local
+# ==========================================
+.aistudio/
+assets/.aistudio/
+
+# ==========================================
+# Configuración de Editores y Sistema
+# ==========================================
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Archivos del Sistema Operativo
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# Logs y Archivos Temporales
+# ==========================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
