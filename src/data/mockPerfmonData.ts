@@ -1,11 +1,15 @@
 import { PerfmonCounterData, ThresholdViolation, OperationHistoryItem, ThresholdConfig, ModuleType } from '../types';
 
 export const initialThresholds: ThresholdConfig = {
-  cpuCriticalLimit: 80,
-  memoryMinAvailableMB: 1000,
-  pageLifeExpectancySec: 300,
-  bufferCacheHitRatio: 95,
-  diskQueueLengthMax: 2,
+  memoryPagesSecLimit: 20,
+  cpuWarning: 50,
+  cpuCritical: 80,
+  cacheHitRatioOLTP: 95,
+  cacheHitRatioOLAP: 80,
+  sqlCompilationsSecLimit: 100,
+  locksSecLimit: 1000,
+  bufferWarning: 95,
+  bufferCritical: 80,
 };
 
 export const initialOperationHistory: OperationHistoryItem[] = [
@@ -239,6 +243,7 @@ export const getSampleAlerts = (moduleType: ModuleType): ThresholdViolation[] =>
   return [
     {
       id: 'alert-1',
+      counterId: isSII ? 'cpu-proc-sii' : 'cpu-proc-tgr',
       timeRange: '06/27/2026 00:03 - 23:48',
       condition: 'CRITICAL CPU > 80%',
       severity: 'CRITICAL',

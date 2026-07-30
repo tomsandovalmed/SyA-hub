@@ -2,6 +2,6 @@
 
 #Para ordenar la sangria o identación: Shift + Alt + F
 
-#Subir cambios a github:  git add.
+#Subir cambios a github:  git add .
                           git commit -m "..."
                           git push origin main

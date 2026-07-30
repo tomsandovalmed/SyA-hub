@@ -7,10 +7,8 @@ import {
   OperationHistoryItem,
   ThresholdConfig,
 } from "./types";
-import {
-  initialThresholds,
-  initialOperationHistory,
-} from "./data/mockPerfmonData";
+import { initialOperationHistory } from "./data/mockPerfmonData";
+import { analyzeCounters } from "./utils/thresholdDetector";
 import { TopNavBar } from "./components/TopNavBar";
 import { InicioVista } from "./components/InicioVista";
 import { HistorialVista } from "./components/HistorialVista";
@@ -19,13 +17,28 @@ import { PerfmonAnalyzerView } from "./components/PerfmonAnalyzerView";
 import { Footer } from "./components/Footer";
 import { NotasYTareas } from "./components/NotasYTareas";
 
+// ============================================================================
+// CONFIGURACIÓN DE UMBRALES DE RESPALDO (S&A CHILE STANDARDS)
+// ============================================================================
+const defaultThresholds: ThresholdConfig = {
+  memoryPagesSecLimit: 20,
+  cpuWarning: 50,
+  cpuCritical: 80,
+  cacheHitRatioOLTP: 95,
+  cacheHitRatioOLAP: 80,
+  sqlCompilationsSecLimit: 100,
+  locksSecLimit: 1000,
+  bufferWarning: 95,
+  bufferCritical: 80,
+};
+
 export default function App() {
   // ==========================================
   // ESTADOS PRINCIPALES DE LA APLICACIÓN
   // ==========================================
   const [currentView, setCurrentView] = useState<ViewMode>("hub");
   const [selectedModule, setSelectedModule] = useState<ModuleType>("SII");
-  const [thresholdConfig, setThresholdConfig] = useState<ThresholdConfig>(initialThresholds);
+  const [thresholdConfig, setThresholdConfig] = useState<ThresholdConfig>(defaultThresholds);
   const [history, setHistory] = useState<OperationHistoryItem[]>(initialOperationHistory);
 
   // 🟢 ESTADO INICIAL VACÍO PARA CONTADORES Y ALERTAS
@@ -53,14 +66,14 @@ export default function App() {
   // PROCESAMIENTO Y ANÁLISIS DE ARCHIVOS LOG
   // ==========================================
 
-  /**
-   * Recibe los contadores parseados del archivo .csv desde PerfmonAnalyzerView.
-   */
-  const handleAnalyzeFile = (parsedCounters: PerfmonCounterData[], filename: string) => {
+  const handleAnalyzeFile = (
+    parsedCounters: PerfmonCounterData[],
+    parsedAlerts: ThresholdViolation[],
+    filename: string
+  ) => {
     setCounters(parsedCounters);
-    setAlerts([]); // Se limpian las alertas predeterminadas
+    setAlerts(parsedAlerts);
 
-    // Registra la acción realizada en el Historial de Operaciones
     const newItem: OperationHistoryItem = {
       id: `op-${Date.now()}`,
       herramienta: `Perfmon Diagnostics (${selectedModule})`,
@@ -80,6 +93,16 @@ export default function App() {
 
   const handleUpdateThresholds = async (newConfig: ThresholdConfig) => {
     setThresholdConfig(newConfig);
+
+    if (counters.length > 0) {
+      const { counters: updatedCounters, alerts: updatedAlerts } = analyzeCounters(
+        counters,
+        newConfig
+      );
+      setCounters(updatedCounters);
+      setAlerts(updatedAlerts);
+    }
+
     try {
       await fetch("/api/v1/perfmon/thresholds", {
         method: "POST",

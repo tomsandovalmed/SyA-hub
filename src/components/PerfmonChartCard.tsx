@@ -1,5 +1,5 @@
-import React from 'react';
-import { PerfmonCounterData } from '../types';
+import React, { useState, useRef, useMemo, useCallback, memo } from 'react';
+import { PerfmonCounterData, ThresholdViolation } from '../types';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -11,8 +11,11 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ChartOptions,
+  Plugin,
 } from 'chart.js';
-import { Copy, Server } from 'lucide-react';
+import { Download, Copy, ChevronDown, Check } from 'lucide-react';
+import { DetectedAlertsSection } from './DetectedAlertsSection';
 
 ChartJS.register(
   CategoryScale,
@@ -28,135 +31,313 @@ ChartJS.register(
 interface PerfmonChartCardProps {
   counterData: PerfmonCounterData;
   counterIndex: number;
+  alerts?: ThresholdViolation[];
 }
 
-export const PerfmonChartCard: React.FC<PerfmonChartCardProps> = ({ counterData, counterIndex }) => {
-  const chartData = {
-    labels: counterData.timeLabels,
-    datasets: [
-      {
-        label: counterData.name,
-        data: counterData.values,
-        borderColor: '#002395',
-        borderWidth: 2,
-        tension: 0.35, // Curva Spline idéntica al proyecto original
-        pointRadius: 0, // 🟢 ELIMINA LOS PUNTOS GIGANTES SATURADOS
-        pointHoverRadius: 6,
-        pointHoverBackgroundColor: '#002395',
-        pointHoverBorderColor: '#ffffff',
-        pointHoverBorderWidth: 2,
-        fill: true,
-        backgroundColor: (context: any) => {
-          const chart = context.chart;
-          const { ctx, chartArea } = chart;
-          if (!chartArea) return 'rgba(0, 35, 149, 0.1)';
-          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, 'rgba(0, 35, 149, 0.25)');
-          gradient.addColorStop(1, 'rgba(0, 35, 149, 0.01)');
-          return gradient;
-        },
-      },
-    ],
-  };
+export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChartCard({
+  counterData,
+  counterIndex,
+  alerts = [],
+}) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const chartRef = useRef<ChartJS<'line'> | null>(null);
+  const chartSectionRef = useRef<HTMLDivElement>(null);
 
-  const options: any = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      intersect: false,
-      mode: 'index',
+  const showToast = useCallback((msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
+  }, []);
+
+  const exportHeaderPlugin = useMemo<Plugin<'line'>>(
+    () => ({
+      id: 'exportHeaderPlugin',
+      beforeDraw: (chart) => {
+        const { ctx, width, height } = chart;
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillStyle = '#002395';
+        ctx.fillText(`Servidor: ${counterData.serverName} | ${counterData.counterName}`, 15, 20);
+
+        ctx.font = '10px sans-serif';
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(width - 230, 16, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#475569';
+        ctx.fillText('Warning Zone', width - 220, 20);
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(width - 130, 16, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#475569';
+        ctx.fillText('Critical Zone', width - 120, 20);
+        ctx.restore();
+      },
+    }),
+    [counterData.serverName, counterData.counterName]
+  );
+
+  const thresholdBandsPlugin = useMemo<Plugin<'line'>>(
+    () => ({
+      id: 'thresholdBands',
+      beforeDraw: (chart) => {
+        if (!counterData.limit) return;
+        const { ctx, chartArea, scales } = chart;
+        if (!chartArea || !scales.y) return;
+
+        const limit = counterData.limit;
+        const warnLimit = limit * 0.7;
+        const yLimitPixel = scales.y.getPixelForValue(limit);
+        const yWarnPixel = scales.y.getPixelForValue(warnLimit);
+        const yTopPixel = chartArea.top;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.08)';
+        ctx.fillRect(chartArea.left, yTopPixel, chartArea.width, Math.max(0, yLimitPixel - yTopPixel));
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.08)';
+        ctx.fillRect(chartArea.left, yLimitPixel, chartArea.width, Math.max(0, yWarnPixel - yLimitPixel));
+        ctx.restore();
+      },
+    }),
+    [counterData.limit]
+  );
+
+  const handleNavigateToChart = useCallback(
+    (index: number) => {
+      setHighlightedIndex(index);
+
+      chartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      requestAnimationFrame(() => {
+        const chart = chartRef.current;
+        if (!chart) return;
+
+        chart.setActiveElements([{ datasetIndex: 0, index }]);
+        chart.tooltip?.setActiveElements([{ datasetIndex: 0, index }], { x: 0, y: 0 });
+        chart.update('none');
+
+        const timestamp =
+          counterData.fullTimestamps?.[index] || counterData.timeLabels[index];
+        showToast(`Navegando al punto: ${timestamp}`);
+      });
     },
-    scales: {
-      x: {
-        grid: { display: false },
-        ticks: {
-          font: { size: 10, family: 'monospace' },
-          color: '#64748b',
-          maxTicksLimit: 12,
-          maxRotation: 45,
-          minRotation: 45,
+    [counterData.fullTimestamps, counterData.timeLabels, showToast]
+  );
+
+  const handleDownload = useCallback(() => {
+    if (!chartRef.current) return;
+    const link = document.createElement('a');
+    link.download = `${counterData.name.replace(/[^a-z0-9]/gi, '_')}.png`;
+    link.href = chartRef.current.toBase64Image('image/png', 1.0);
+    link.click();
+    showToast('Descargando gráfico oficial con leyenda y servidor...');
+  }, [counterData.name, showToast]);
+
+  const chartData = useMemo(
+    () => ({
+      labels: counterData.timeLabels,
+      datasets: [
+        {
+          label: counterData.serverName,
+          data: counterData.values,
+          borderColor: '#002395',
+          borderWidth: 2,
+          tension: 0.35,
+          pointRadius: counterData.values.map((_, idx) => (idx === highlightedIndex ? 8 : 0)),
+          pointBackgroundColor: counterData.values.map((_, idx) =>
+            idx === highlightedIndex ? '#ef4444' : '#002395'
+          ),
+          pointHoverRadius: 6,
+          fill: true,
+          backgroundColor: 'rgba(0, 35, 149, 0.05)',
+        },
+      ],
+    }),
+    [counterData.timeLabels, counterData.values, counterData.serverName, highlightedIndex]
+  );
+
+  const chartOptions = useMemo<ChartOptions<'line'>>(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 25 } },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 10 }, color: '#64748b', maxTicksLimit: 10 },
+        },
+        y: {
+          grid: { color: '#f1f5f9' },
+          border: { dash: [4, 4] },
+          ticks: { font: { size: 11 }, color: '#64748b' },
         },
       },
-      y: {
-        grid: { color: '#f1f5f9' },
-        border: { dash: [4, 4], drawBorder: false },
-        ticks: {
-          font: { size: 11 },
-          color: '#64748b',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0f172a',
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: {
+            title: (items) =>
+              counterData.fullTimestamps?.[items[0].dataIndex] || items[0].label,
+          },
         },
       },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: '#0f172a',
-        padding: 10,
-        cornerRadius: 8,
-      },
-    },
-  };
+    }),
+    [counterData.fullTimestamps]
+  );
+
+  const chartPlugins = useMemo(
+    () => [exportHeaderPlugin, thresholdBandsPlugin],
+    [exportHeaderPlugin, thresholdBandsPlugin]
+  );
+
+  const conditionBadgeClass =
+    counterData.condition === 'CRITICAL'
+      ? 'bg-red-100 text-red-700'
+      : counterData.condition === 'WARNING'
+        ? 'bg-amber-100 text-amber-700'
+        : 'bg-green-100 text-green-700';
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xs space-y-6">
+    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xs space-y-6 relative">
+      {toastMsg && (
+        <div className="absolute top-4 right-6 bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5 animate-fade-in z-20">
+          <Check className="w-3.5 h-3.5 text-green-400" />
+          {toastMsg}
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-4">
         <div>
           <h3 className="text-lg font-bold text-[#002395]">
             {counterIndex}. Contador: {counterData.counterName}
           </h3>
-          <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 font-medium">
-            <Server className="w-3.5 h-3.5 text-[#002395]" />
-            <span>Servidor: <strong className="text-gray-700">{counterData.serverName}</strong></span>
-          </div>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Servidor: <strong className="text-gray-700">{counterData.serverName}</strong>
+          </p>
         </div>
 
-        <button 
-          onClick={() => navigator.clipboard.writeText(counterData.counterName)}
-          className="text-xs font-semibold text-gray-600 hover:text-[#002395] bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl px-3 py-1.5 transition-colors flex items-center gap-1.5 cursor-pointer"
-        >
-          <Copy className="w-3.5 h-3.5" />
-          Copiar Nombre
-        </button>
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          <button
+            type="button"
+            onClick={handleDownload}
+            className="bg-[#002395] hover:bg-[#001a70] text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Descargar gráfico
+          </button>
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+            >
+              <span>Más acciones</span>
+              <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+            </button>
+
+            {isMenuOpen && (
+              <div
+                className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-30"
+                onMouseLeave={() => setIsMenuOpen(false)}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(counterData.condition);
+                    showToast('Condition copiada');
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                >
+                  <Copy className="w-3.5 h-3.5 text-gray-400" /> Copiar condition
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      `Min: ${counterData.min} Avg: ${counterData.avg} Max: ${counterData.max}`
+                    );
+                    showToast('Stats copiadas');
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                >
+                  <Copy className="w-3.5 h-3.5 text-gray-400" /> Copiar Min, Avg, Max
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Gráfico Estilizado Limpio */}
-      <div className="h-72 w-full">
-        <Line data={chartData} options={options} />
+      <div className="flex justify-end items-center gap-4 text-2xs font-semibold text-gray-600">
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-amber-400" /> Warning Zone
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-red-500" /> Critical Zone
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-[#002395]" /> {counterData.serverName}
+        </span>
       </div>
 
-      {/* Descripción */}
-      <div className="p-3 bg-blue-50/60 border border-blue-100 rounded-xl text-xs text-blue-900">
-        💡 {counterData.description}
+      <div ref={chartSectionRef} className="h-72 w-full scroll-mt-24">
+        <Line ref={chartRef} data={chartData} options={chartOptions} plugins={chartPlugins} />
       </div>
 
-      {/* Tabla de estadísticas exactas */}
-      <div className="overflow-x-auto border border-gray-100 rounded-xl">
-        <table className="w-full text-left text-xs">
-          <thead className="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider">
-            <tr>
-              <th className="p-3">CONDITION</th>
-              <th className="p-3">COUNTER</th>
-              <th className="p-3 text-right">MIN</th>
-              <th className="p-3 text-right">AVG</th>
-              <th className="p-3 text-right">MAX</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 text-gray-700 font-mono">
-            <tr>
-              <td className="p-3 font-sans font-bold">
-                <span className={`px-2.5 py-1 rounded-full text-2xs ${
-                  counterData.condition === 'CRITICAL' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                }`}>
-                  {counterData.condition}
-                </span>
-              </td>
-              <td className="p-3 text-gray-600">{counterData.counterName}</td>
-              <td className="p-3 text-right font-bold">{counterData.min.toFixed(2)} {counterData.unit}</td>
-              <td className="p-3 text-right font-bold text-[#002395]">{counterData.avg.toFixed(2)} {counterData.unit}</td>
-              <td className="p-3 text-right font-bold">{counterData.max.toFixed(2)} {counterData.unit}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="space-y-2">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-600">
+          OVERALL COUNTER INSTANCE STATISTICS
+        </h4>
+
+        <div className="overflow-x-auto border border-gray-100 rounded-xl">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider">
+              <tr>
+                <th className="p-3">CONDITION</th>
+                <th className="p-3">PROBLEM / CONDITION DETAIL</th>
+                <th className="p-3 text-right">MIN</th>
+                <th className="p-3 text-right">AVG</th>
+                <th className="p-3 text-right">MAX</th>
+                <th className="p-3 text-right">STD DEVIATION</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 text-gray-700 font-mono">
+              <tr>
+                <td className="p-3 font-sans font-bold">
+                  <span className={`px-2.5 py-1 rounded-full text-2xs ${conditionBadgeClass}`}>
+                    {counterData.condition}
+                  </span>
+                </td>
+                <td className="p-3 font-sans text-gray-600 font-medium">
+                  {counterData.conditionDetail || 'Sin anomalías registradas'}
+                </td>
+                <td className="p-3 text-right font-bold">{counterData.min.toFixed(2)}</td>
+                <td className="p-3 text-right font-bold text-[#002395]">
+                  {counterData.avg.toFixed(2)}
+                </td>
+                <td className="p-3 text-right font-bold">{counterData.max.toFixed(2)}</td>
+                <td className="p-3 text-right text-gray-500">
+                  {(counterData.stdDev || 0).toFixed(2)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      <DetectedAlertsSection alerts={alerts} onNavigateToChart={handleNavigateToChart} />
     </div>
   );
-};
+});
