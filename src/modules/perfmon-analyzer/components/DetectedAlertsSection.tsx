@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ThresholdViolation } from '../types';
+import { ThresholdViolation } from '../../../types';
 import { AlertTriangle, ChevronDown, ChevronUp, MapPin } from 'lucide-react';
 
 const INITIAL_VISIBLE_COUNT = 5;

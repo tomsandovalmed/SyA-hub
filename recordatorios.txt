@@ -1,3 +1,7 @@
+#Estudiar Buenas prácticas: En producción, simplemente se configura una variable de entorno 
+          (por ejemplo en tu .env) como VITE_USE_MOCK_DATA=false. Así el código sabe si consumir
+           la API real o los datos de prueba sin tener que borrar el archivo.
+
 #Para hacer correr el servidor: node node_modules\vite\bin\vite.js
 
 #Para ordenar la sangria o identación: Shift + Alt + F

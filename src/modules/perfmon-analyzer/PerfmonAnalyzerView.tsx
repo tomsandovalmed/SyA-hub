@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ViewMode, ModuleType, PerfmonCounterData, ThresholdViolation, ThresholdConfig } from '../types';
-import { PerfmonChartCard } from './PerfmonChartCard';
-import { ThresholdsModal } from './ThresholdsModal';
-import { ReportExportModal } from './ReportExportModal';
-import { parsePerfmonCsv } from '../utils/csvParser';
+import { ViewMode, ModuleType, PerfmonCounterData, ThresholdViolation, ThresholdConfig } from '../../types';
+import { PerfmonChartCard } from './components/PerfmonChartCard';
+import { ThresholdsModal } from './components/ThresholdsModal';
+import { ReportExportModal } from './components/ReportExportModal';
+import { parsePerfmonCsv } from './utils/csvParser';
 import {
   Upload,
   FileText,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ThresholdConfig } from '../types';
+import { ThresholdConfig } from '../../../types';
 import { X, Settings, Sliders, CheckCircle2 } from 'lucide-react';
 
 interface ThresholdsModalProps {

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useCallback, memo } from 'react';
-import { PerfmonCounterData, ThresholdViolation } from '../types';
+import { PerfmonCounterData, ThresholdViolation } from '../../../types';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -12,6 +12,7 @@ import {
   Legend,
   Filler,
   ChartOptions,
+  ChartData,
   Plugin,
 } from 'chart.js';
 import { Download, Copy, ChevronDown, Check } from 'lucide-react';
@@ -50,6 +51,7 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
     setTimeout(() => setToastMsg(null), 3000);
   }, []);
 
+  // Plugin personalizado para dibujar la cabecera e información centreada en el canvas
   const exportHeaderPlugin = useMemo<Plugin<'line'>>(
     () => ({
       id: 'exportHeaderPlugin',
@@ -59,30 +61,36 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, width, height);
 
+        // 1. Título Centrado en el lienzo
         ctx.font = 'bold 12px sans-serif';
         ctx.fillStyle = '#002395';
-        ctx.fillText(`Servidor: ${counterData.serverName} | ${counterData.counterName}`, 15, 20);
+        ctx.textAlign = 'center';
+        ctx.fillText(`Servidor: ${counterData.serverName} | ${counterData.counterName}`, width / 2, 20);
 
+        // Leyendas a la derecha
+        ctx.textAlign = 'left';
         ctx.font = '10px sans-serif';
+        
         ctx.fillStyle = '#f59e0b';
         ctx.beginPath();
-        ctx.arc(width - 230, 16, 5, 0, Math.PI * 2);
+        ctx.arc(width - 210, 16, 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#475569';
-        ctx.fillText('Warning Zone', width - 220, 20);
+        ctx.fillText('Warning Zone', width - 200, 20);
 
         ctx.fillStyle = '#ef4444';
         ctx.beginPath();
-        ctx.arc(width - 130, 16, 5, 0, Math.PI * 2);
+        ctx.arc(width - 110, 16, 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#475569';
-        ctx.fillText('Critical Zone', width - 120, 20);
+        ctx.fillText('Critical Zone', width - 100, 20);
         ctx.restore();
       },
     }),
     [counterData.serverName, counterData.counterName]
   );
 
+  // Plugin para pintar las franjas de advertencia y peligro
   const thresholdBandsPlugin = useMemo<Plugin<'line'>>(
     () => ({
       id: 'thresholdBands',
@@ -139,7 +147,8 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
     showToast('Descargando gráfico oficial con leyenda y servidor...');
   }, [counterData.name, showToast]);
 
-  const chartData = useMemo(
+  // Estructura de datos explícitamente tipada como ChartData<'line'>
+  const chartData = useMemo<ChartData<'line'>>(
     () => ({
       labels: counterData.timeLabels,
       datasets: [
@@ -149,6 +158,7 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
           borderColor: '#002395',
           borderWidth: 2,
           tension: 0.35,
+          clip: false, // Previene el recorte de puntos en los bordes
           pointRadius: counterData.values.map((_, idx) => (idx === highlightedIndex ? 8 : 0)),
           pointBackgroundColor: counterData.values.map((_, idx) =>
             idx === highlightedIndex ? '#ef4444' : '#002395'
@@ -166,13 +176,17 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
     () => ({
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 25 } },
+      layout: { 
+        padding: { top: 40, bottom: 10, left: 10, right: 10 }
+      },
       scales: {
         x: {
           grid: { display: false },
           ticks: { font: { size: 10 }, color: '#64748b', maxTicksLimit: 10 },
         },
         y: {
+          min: 0,
+          grace: '8%', // Margen porcentual superior para dar respiro al eje
           grid: { color: '#f1f5f9' },
           border: { dash: [4, 4] },
           ticks: { font: { size: 11 }, color: '#64748b' },
@@ -194,7 +208,8 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
     [counterData.fullTimestamps]
   );
 
-  const chartPlugins = useMemo(
+  // Arreglo de plugins tipado explícitamente como Plugin<'line'>[] para garantizar compatibilidad estricta
+  const chartPlugins = useMemo<Plugin<'line'>[]>(
     () => [exportHeaderPlugin, thresholdBandsPlugin],
     [exportHeaderPlugin, thresholdBandsPlugin]
   );
@@ -280,19 +295,7 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
         </div>
       </div>
 
-      <div className="flex justify-end items-center gap-4 text-2xs font-semibold text-gray-600">
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-amber-400" /> Warning Zone
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-red-500" /> Critical Zone
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-[#002395]" /> {counterData.serverName}
-        </span>
-      </div>
-
-      <div ref={chartSectionRef} className="h-72 w-full scroll-mt-24">
+      <div ref={chartSectionRef} className="h-80 w-full scroll-mt-24">
         <Line ref={chartRef} data={chartData} options={chartOptions} plugins={chartPlugins} />
       </div>
 

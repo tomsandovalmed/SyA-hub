@@ -1,5 +1,5 @@
 import React from 'react';
-import { ViewMode, ModuleType } from '../types';
+import { ViewMode, ModuleType } from '../../types';
 import { Bell, Settings, LayoutGrid, Clock, CheckSquare } from 'lucide-react';
 
 interface TopNavBarProps {

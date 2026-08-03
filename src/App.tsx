@@ -7,15 +7,15 @@ import {
   OperationHistoryItem,
   ThresholdConfig,
 } from "./types";
-import { initialOperationHistory } from "./data/mockPerfmonData";
-import { analyzeCounters } from "./utils/thresholdDetector";
-import { TopNavBar } from "./components/TopNavBar";
-import { InicioVista } from "./components/InicioVista";
-import { HistorialVista } from "./components/HistorialVista";
-import { SeleccionModulo } from "./components/SeleccionModulo";
-import { PerfmonAnalyzerView } from "./components/PerfmonAnalyzerView";
-import { Footer } from "./components/Footer";
-import { NotasYTareas } from "./components/NotasYTareas";
+import { initialOperationHistory } from "./modules/perfmon-analyzer/data/mockPerfmonData";
+import { analyzeCounters } from "./modules/perfmon-analyzer/utils/thresholdDetector";
+import { TopNavBar } from "./components/layout/TopNavBar";
+import { InicioVista } from "./views/InicioVista";
+import { HistorialVista } from "./views/HistorialVista";
+import { SeleccionModulo } from "./modules/perfmon-analyzer/components/SeleccionModulo";
+import { PerfmonAnalyzerView } from "./modules/perfmon-analyzer/PerfmonAnalyzerView";
+import { Footer } from "./components/layout/Footer";
+import { NotasYTareas } from "./views/NotasYTareas";
 
 // ============================================================================
 // CONFIGURACIÓN DE UMBRALES DE RESPALDO (S&A CHILE STANDARDS)

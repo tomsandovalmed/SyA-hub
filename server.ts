@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { getSamplePerfmonCounters, getSampleAlerts, initialOperationHistory, initialThresholds } from "./src/data/mockPerfmonData";
+import { getSamplePerfmonCounters, getSampleAlerts, initialOperationHistory, initialThresholds } from "./src/modules/perfmon-analyzer/data/mockPerfmonData";
 
 async function startServer() {
   const app = express();
