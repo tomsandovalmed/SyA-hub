@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { getSamplePerfmonCounters, getSampleAlerts, initialOperationHistory, initialThresholds } from "./src/modules/perfmon-analyzer/data/mockPerfmonData";
 
@@ -64,19 +65,23 @@ async function startServer() {
     });
   });
 
-  // Vite middleware for dev / static serving for prod
-  if (process.env.NODE_ENV !== "production") {
+  // Verificación estricta: si existe la carpeta 'dist', sirve la versión compilada/ofuscada
+  const distPath = path.join(process.cwd(), "dist");
+  const isProduction = process.env.NODE_ENV === "production" || fs.existsSync(distPath);
+
+  if (isProduction) {
+    console.log("Modo Producción: Sirviendo assets ofuscados desde /dist");
+    app.use(express.static(distPath));
+    app.get("*", (_req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  } else {
+    console.log("Modo Desarrollo: Middleware Vite activo");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (_req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
   }
 
   app.listen(PORT, "0.0.0.0", () => {

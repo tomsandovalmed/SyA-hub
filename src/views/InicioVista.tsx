@@ -46,10 +46,10 @@ export const InicioVista: React.FC<InicioVistaProps> = ({ onSelectTool, onOpenMo
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-[#001360]">
-                    Interprete Perfmon y generador de informes
+                    Interprete Perfmon y generador de informes SQL
                   </h2>
                   <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
-                    Herramienta Principal
+                    Herramienta para informes SQL
                   </span>
                 </div>
               </div>

@@ -6,6 +6,28 @@
 
 #Para ordenar la sangria o identación: Shift + Alt + F
 
-#Subir cambios a github:  git add .
-                          git commit -m "..."
-                          git push origin main
+# 1) DESARROLLO LOCAL  
+        # Iniciar servidor de desarrollo con Hot Reload
+        npm run dev
+
+# 2) DESPLIEGUE EN PRODUCCIÓN (OFUSCADO)
+        # Paso 1: Compilar y ofuscar código a /dist
+        npm run build
+
+        # Paso 2: Iniciar servidor Express en modo producción
+        set NODE_ENV=production && npm run start
+
+# 3) TÚNELES DE EXPOSICIÓN PUBLICA (PUERTO 3000)
+        # Opción 1: Cloudflare Tunnel estándar (Recomendada)
+        cloudflared tunnel --url http://localhost:3000
+
+        # Opción 2: Cloudflare Tunnel forzando HTTP/2
+        cloudflared tunnel --protocol http2 --url http://localhost:3000
+
+        # Opción 3: Alternativa rápida con Localtunnel
+        npx localtunnel --port 3000
+
+# 4) CONTROL DE VERSIONES (GIT)
+        git add .
+        git commit -m "feat: descripción de los cambios"
+        git push origin main
