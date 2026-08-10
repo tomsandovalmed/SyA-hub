@@ -1,4 +1,4 @@
-import { PerfmonCounterData, ModuleType, ThresholdViolation, ThresholdConfig, MetricKey } from '../../../types';
+import { PerfmonCounterData, ModuleType, ThresholdViolation, ThresholdConfig, MetricKey } from '../types/perfmon.types';
 import { evaluateCounterCondition, detectAlertsForCounter } from './thresholdDetector';
 
 export interface ParseResult {

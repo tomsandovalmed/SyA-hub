@@ -1,4 +1,4 @@
-import { PerfmonCounterData, ThresholdViolation, OperationHistoryItem, ThresholdConfig, ModuleType } from '../../../types';
+import { PerfmonCounterData, ThresholdViolation, OperationHistoryItem, ThresholdConfig, ModuleType } from '../types/perfmon.types';
 
 export const initialThresholds: ThresholdConfig = {
   memoryPagesSecLimit: 20,

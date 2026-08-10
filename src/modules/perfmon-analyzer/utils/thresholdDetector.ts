@@ -3,7 +3,7 @@ import {
   ThresholdConfig,
   ThresholdViolation,
   MetricKey,
-} from '../../../types';
+} from '../types/perfmon.types';
 
 export interface ConditionResult {
   condition: 'OK' | 'WARNING' | 'CRITICAL';

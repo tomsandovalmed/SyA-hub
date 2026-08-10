@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ModuleType, ViewMode } from '../types';
+import { ModuleType, ViewMode } from '../types/perfmon.types';
 import { Landmark, Receipt, ArrowRight, Info, ChevronRight, BookOpen, X } from 'lucide-react';
 
 interface ModuleSelectionViewProps {
@@ -11,7 +11,7 @@ export const SeleccionModulo: React.FC<ModuleSelectionViewProps> = ({ onSelectMo
   const [showDocsModal, setShowDocsModal] = useState(false);
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 md:py-8 space-y-8">
       
       {/* Breadcrumb Navigation - Cliqueable */}
       <div className="flex items-center gap-2 text-xs text-gray-500 font-mono uppercase tracking-wider">
@@ -36,19 +36,19 @@ export const SeleccionModulo: React.FC<ModuleSelectionViewProps> = ({ onSelectMo
       </div>
 
       {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto px-2 md:px-0">
         
         {/* Módulo SII */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-t-4 border-t-[#002395]">
-          <div className="w-20 h-20 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-6 text-[#002395] group-hover:scale-110 transition-transform">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 md:p-6 min-h-[320px] shadow-sm hover:shadow-md transition-all duration-300 flex flex-col items-center text-center group border-t-4 border-t-[#002395]">
+          <div className="w-20 h-20 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-5 text-[#002395] group-hover:scale-110 transition-transform">
             <Landmark className="w-10 h-10" />
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">
             Módulo SII
           </h2>
 
-          <p className="text-sm text-gray-600 mb-8 leading-relaxed">
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
             Optimizado para el análisis de registros del Servicio de Impuestos Internos. Incluye validación de sintaxis XML, cruce de folios y auditoría de integridad transaccional para cumplimiento tributario.
           </p>
 
@@ -64,8 +64,8 @@ export const SeleccionModulo: React.FC<ModuleSelectionViewProps> = ({ onSelectMo
         </div>
 
         {/* Módulo TGR */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-t-4 border-t-[#001A70]">
-          <div className="w-20 h-20 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mb-6 text-[#002395] group-hover:scale-110 transition-transform">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 md:p-6 min-h-[320px] shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-t-4 border-t-[#001A70]">
+          <div className="w-20 h-20 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mb-5 text-[#002395] group-hover:scale-110 transition-transform">
             <Receipt className="w-10 h-10" />
           </div>
 
@@ -73,7 +73,7 @@ export const SeleccionModulo: React.FC<ModuleSelectionViewProps> = ({ onSelectMo
             Módulo TGR
           </h2>
 
-          <p className="text-sm text-gray-600 mb-8 leading-relaxed">
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
             Diseñado para el análisis de registros de la Tesorería General de la República. Enfocado en la conciliación de pagos masivos, liquidaciones de deuda y reportes de recaudación estatal.
           </p>
 

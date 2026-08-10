@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ViewMode, ModuleType, PerfmonCounterData, ThresholdViolation, ThresholdConfig } from '../../types';
+import { ViewMode, ModuleType, PerfmonCounterData, ThresholdViolation, ThresholdConfig } from './types/perfmon.types';
 import { PerfmonChartCard } from './components/PerfmonChartCard';
 import { ThresholdsModal } from './components/ThresholdsModal';
 import { ReportExportModal } from './components/ReportExportModal';

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useCallback, memo } from 'react';
-import { PerfmonCounterData, ThresholdViolation } from '../../../types';
+import { PerfmonCounterData, ThresholdViolation } from '../types/perfmon.types';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,

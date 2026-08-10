@@ -1,66 +1,32 @@
-export type ViewMode = 'hub' | 'module-select' | 'analyzer' | 'history' | 'tasks';
+export type { ViewMode, ModuleType, MetricKey, PerfmonCounterData, ThresholdViolation, OperationHistoryItem, ThresholdConfig } from './modules/perfmon-analyzer/types/perfmon.types';
 
-export type ModuleType = 'SII' | 'TGR';
+export type Role = 'ADMIN' | 'WORKER' | 'CLIENT';
 
-export type MetricKey =
-  | 'memoria'
-  | 'cpu'
-  | 'full_scans'
-  | 'buffer'
-  | 'transacciones'
-  | 'conexiones';
-
-export interface PerfmonCounterData {
+export interface User {
   id: string;
+  email: string;
   name: string;
-  counterName: string;
-  instance: string;
-  serverName: string;
-  module: ModuleType;
-  unit: string;
-  metricKey?: MetricKey;
-  condition: 'OK' | 'WARNING' | 'CRITICAL';
-  conditionDetail?: string;
-  description: string;
-  min: number;
-  avg: number;
-  max: number;
-  stdDev?: number;
-  limit?: number;
-  timeLabels: string[];
-  fullTimestamps?: string[];
-  values: number[];
+  role: Role;
+  clientId?: 'SII' | 'TGR';
 }
 
-export interface ThresholdViolation {
+export interface AuthCredentials {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
+}
+
+export interface ReportItem {
   id: string;
-  counterId: string;
-  dataIndex?: number;
-  timeRange: string;
-  condition: string;
-  severity: 'CRITICAL' | 'WARNING' | 'INFO';
-  counter: string;
-  avgValue: number;
-  limit: number;
-}
-
-export interface OperationHistoryItem {
-  id: string;
-  herramienta: string;
-  usuario: string;
-  fecha: string;
-  estado: 'Completado' | 'Pendiente' | 'En Proceso' | 'Error';
-  modulo?: ModuleType;
-}
-
-export interface ThresholdConfig {
-  memoryPagesSecLimit: number;
-  cpuWarning: number;
-  cpuCritical: number;
-  cacheHitRatioOLTP: number;
-  cacheHitRatioOLAP: number;
-  sqlCompilationsSecLimit: number;
-  locksSecLimit: number;
-  bufferWarning: number;
-  bufferCritical: number;
+  title: string;
+  clientId: 'SII' | 'TGR';
+  type: string;
+  status: string;
+  createdAt: string;
+  summary: string;
+  fileName: string;
 }

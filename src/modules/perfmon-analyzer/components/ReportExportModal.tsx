@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PerfmonCounterData, ThresholdViolation, ModuleType } from '../../../types';
+import { PerfmonCounterData, ThresholdViolation, ModuleType } from '../types/perfmon.types';
 import { FileText, Download, Check, X, FileSpreadsheet, Code2 } from 'lucide-react';
 
 interface ReportExportModalProps {

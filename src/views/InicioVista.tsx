@@ -1,5 +1,5 @@
 import React from 'react';
-import { ModuleType } from '../types';
+import { ModuleType } from '../modules/perfmon-analyzer/types/perfmon.types';
 import { Rocket, BarChart3, Play, Database } from 'lucide-react';
 
 interface InicioVistaProps {
@@ -10,11 +10,11 @@ interface InicioVistaProps {
 // AQUÍ FORZAMOS LA EXPORTACIÓN NOMBRADA: "export const InicioVista"
 export const InicioVista: React.FC<InicioVistaProps> = ({ onSelectTool, onOpenModule }) => {
   return (
-    <div className="space-y-10 pb-12">
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 md:py-8 space-y-8">
       
       {/* Hero Banner Section */}
-      <section className="bg-gradient-to-r from-[#eff4ff] via-[#f8f9ff] to-[#dee1ff] rounded-2xl p-8 md:p-12 border border-[#d3e4fe] shadow-xs relative overflow-hidden">
-        <div className="max-w-3xl relative z-10">
+      <section className="bg-gradient-to-r from-[#eff4ff] via-[#f8f9ff] to-[#dee1ff] rounded-2xl p-5 md:p-6 min-h-[180px] border border-[#d3e4fe] shadow-xs relative overflow-hidden">
+        <div className="max-w-2xl relative z-10 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#002395]/10 text-[#002395] text-xs font-bold uppercase tracking-wider mb-4">
             <Database className="w-3.5 h-3.5" />
             S&A Data Analysis Suite
@@ -22,7 +22,7 @@ export const InicioVista: React.FC<InicioVistaProps> = ({ onSelectTool, onOpenMo
           <h1 className="text-3xl md:text-4xl font-extrabold text-[#001360] tracking-tight leading-tight">
             Centro de Herramientas de Análisis
           </h1>
-          <p className="mt-4 text-gray-600 text-base md:text-lg leading-relaxed">
+          <p className="mt-3 text-gray-600 text-base md:text-lg leading-relaxed">
             Optimice la toma de decisiones con nuestra suite técnica. Visualice rendimientos, genere reportes precisos y gestione datos críticos con la precisión que su negocio demanda.
           </p>
         </div>
@@ -35,12 +35,12 @@ export const InicioVista: React.FC<InicioVistaProps> = ({ onSelectTool, onOpenMo
 
       {/* Main Feature: Interprete Perfmon Bento Card */}
       <section className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-        <div className="flex flex-col lg:flex-row">
+        <div className="flex flex-col gap-6 lg:flex-row">
           
           {/* Columna Izquierda */}
-          <div className="p-8 md:p-10 flex-1 flex flex-col justify-between">
+          <div className="p-6 md:p-8 flex-1 flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-3">
                 <div className="p-3 bg-blue-50 text-[#002395] rounded-xl border border-blue-100">
                   <BarChart3 className="w-7 h-7" />
                 </div>
@@ -59,10 +59,10 @@ export const InicioVista: React.FC<InicioVistaProps> = ({ onSelectTool, onOpenMo
               </p>
             </div>
 
-            <div className="mt-8 flex items-center">
+            <div className="mt-6 flex items-center">
               <button
                 onClick={onSelectTool}
-                className="w-full sm:w-auto px-8 py-3.5 bg-[#002395] hover:bg-[#001A70] text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2.5 group cursor-pointer"
+                className="w-full sm:w-auto px-7 py-3 bg-[#002395] hover:bg-[#001A70] text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2.5 group cursor-pointer"
               >
                 <Rocket className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 Utilizar Herramienta
@@ -71,7 +71,7 @@ export const InicioVista: React.FC<InicioVistaProps> = ({ onSelectTool, onOpenMo
           </div>
 
           {/* Columna Derecha (Motor Algorítmico) */}
-          <div className="w-full lg:w-2/5 bg-slate-900 p-8 flex flex-col justify-center items-center text-white relative min-h-[260px] overflow-hidden">
+          <div className="w-full lg:w-2/5 bg-slate-900 p-6 flex flex-col justify-center items-center text-white relative min-h-[200px] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-[#002395]/40 to-slate-950 opacity-90"></div>
             
             <div className="relative z-10 text-center space-y-4 max-w-xs">

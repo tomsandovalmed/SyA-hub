@@ -6,16 +6,20 @@ import {
   ThresholdViolation,
   OperationHistoryItem,
   ThresholdConfig,
-} from "./types";
+} from "./modules/perfmon-analyzer/types/perfmon.types";
 import { initialOperationHistory } from "./modules/perfmon-analyzer/data/mockPerfmonData";
 import { analyzeCounters } from "./modules/perfmon-analyzer/utils/thresholdDetector";
-import { TopNavBar } from "./components/layout/TopNavBar";
+import { TopNavBar } from "./components/ui/TopNavBar";
 import { InicioVista } from "./views/InicioVista";
 import { HistorialVista } from "./views/HistorialVista";
 import { SeleccionModulo } from "./modules/perfmon-analyzer/components/SeleccionModulo";
 import { PerfmonAnalyzerView } from "./modules/perfmon-analyzer/PerfmonAnalyzerView";
-import { Footer } from "./components/layout/Footer";
+import { Footer } from "./components/ui/Footer";
 import { NotasYTareas } from "./views/NotasYTareas";
+import { LoginView } from "./views/LoginView";
+import { ClientReportsView } from "./views/ClientReportsView";
+import { AdminDashboardView } from "./views/AdminDashboardView";
+import type { User } from "./types";
 
 // ============================================================================
 // CONFIGURACIÓN DE UMBRALES DE RESPALDO (S&A CHILE STANDARDS)
@@ -38,6 +42,7 @@ export default function App() {
   // ==========================================
   const [currentView, setCurrentView] = useState<ViewMode>("hub");
   const [selectedModule, setSelectedModule] = useState<ModuleType>("SII");
+  const [authUser, setAuthUser] = useState<User | null>(null);
   const [thresholdConfig, setThresholdConfig] = useState<ThresholdConfig>(defaultThresholds);
   const [history, setHistory] = useState<OperationHistoryItem[]>(initialOperationHistory);
 
@@ -60,6 +65,16 @@ export default function App() {
     setCounters([]);
     setAlerts([]);
     setCurrentView("analyzer");
+  };
+
+  const handleLoginSuccess = (user: User) => {
+    setAuthUser(user);
+    setCurrentView(user.role === "CLIENT" ? "client" : user.role === "ADMIN" ? "admin" : "hub");
+  };
+
+  const handleLogout = () => {
+    setAuthUser(null);
+    setCurrentView("hub");
   };
 
   // ==========================================
@@ -117,6 +132,14 @@ export default function App() {
   // ==========================================
   // RENDERIZADO DE ESTRUCTURA Y VISTAS
   // ==========================================
+  if (!authUser) {
+    return <LoginView onLoginSuccess={handleLoginSuccess} />;
+  }
+
+  if (authUser.role === "CLIENT") {
+    return <ClientReportsView user={authUser} onLogout={handleLogout} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f8f9ff] text-slate-900 font-sans antialiased">
       
@@ -124,11 +147,13 @@ export default function App() {
       <TopNavBar
         currentView={currentView}
         selectedModule={selectedModule}
+        authUser={authUser}
         onNavigate={(view) => setCurrentView(view)}
+        onLogout={handleLogout}
       />
 
       {/* Main Contenedor */}
-      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
         
         {currentView === "hub" && (
           <InicioVista
@@ -148,7 +173,7 @@ export default function App() {
           <NotasYTareas onNavigate={(view) => setCurrentView(view)} />
         )}
 
-        {currentView === "module-select" && (
+          {currentView === "module-select" && (
           <SeleccionModulo
             onSelectModule={(mod) => handleSelectModule(mod)}
             onNavigate={(view) => setCurrentView(view)}
@@ -166,6 +191,10 @@ export default function App() {
             onAnalyzeFile={handleAnalyzeFile}
             onNavigate={(view) => setCurrentView(view)}
           />
+        )}
+
+        {currentView === "admin" && authUser && (
+          <AdminDashboardView user={authUser} onNavigate={(view) => setCurrentView(view)} />
         )}
       </main>
 

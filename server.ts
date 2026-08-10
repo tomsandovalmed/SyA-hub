@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { getSamplePerfmonCounters, getSampleAlerts, initialOperationHistory, initialThresholds } from "./src/modules/perfmon-analyzer/data/mockPerfmonData";
+import { demoReports, demoUsers } from "./src/config/auth";
 
 async function startServer() {
   const app = express();
@@ -62,6 +63,46 @@ async function startServer() {
       success: true,
       message: "Thresholds configuration updated successfully",
       config: newConfig
+    });
+  });
+
+  app.post("/api/v1/auth/login", (req, res) => {
+    const { email, password } = req.body || {};
+    const user = demoUsers.find((entry) => entry.email === email);
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Usuario no encontrado" });
+    }
+
+    const expectedPassword = `${user.role.toLowerCase()}123`;
+    if (password !== expectedPassword) {
+      return res.status(401).json({ success: false, message: "Contraseña incorrecta" });
+    }
+
+    return res.json({
+      success: true,
+      user,
+      token: `mock-${user.id}`,
+      backend: {
+        provider: "firebase-auth-ready",
+        database: "postgresql-ready",
+        note: "La lógica de autenticación y reportes está preparada para conectar con Firebase Auth y PostgreSQL en una siguiente iteración.",
+      },
+    });
+  });
+
+  app.get("/api/v1/reports", (req, res) => {
+    const clientId = req.query.clientId as string | undefined;
+    const reports = demoReports.filter((report) => !clientId || report.clientId === clientId);
+
+    res.json({
+      success: true,
+      clientId: clientId || null,
+      reports,
+      backend: {
+        provider: "postgresql-ready",
+        note: "Los informes se filtran por clientId en este mock y pueden migrarse a una tabla relacional en PostgreSQL.",
+      },
     });
   });
 
