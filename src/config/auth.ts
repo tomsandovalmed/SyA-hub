@@ -1,6 +1,6 @@
 import type { ReportItem, User } from '../types';
 
-export const demoUsers: User[] = [
+const initialUsers: User[] = [
   {
     id: 'admin-1',
     email: 'admin@sachile.cl',
@@ -28,6 +28,24 @@ export const demoUsers: User[] = [
     clientId: 'TGR',
   },
 ];
+
+let users: User[] = [...initialUsers];
+
+export const usersStore = {
+  getUsers: () => users.slice(),
+  setUsers: (next: User[]) => {
+    users = next.slice();
+  },
+  addUser: (u: User) => {
+    users = [u, ...users];
+  },
+  updateUser: (u: User) => {
+    users = users.map((x) => (x.id === u.id ? { ...x, ...u } : x));
+  },
+  deleteUser: (id: string) => {
+    users = users.filter((x) => x.id !== id);
+  },
+};
 
 export const demoReports: ReportItem[] = [
   {

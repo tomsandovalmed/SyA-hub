@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { getSamplePerfmonCounters, getSampleAlerts, initialOperationHistory, initialThresholds } from "./src/modules/perfmon-analyzer/data/mockPerfmonData";
-import { demoReports, demoUsers } from "./src/config/auth";
+import { demoReports, usersStore } from "./src/config/auth";
 
 async function startServer() {
   const app = express();
@@ -68,14 +68,15 @@ async function startServer() {
 
   app.post("/api/v1/auth/login", (req, res) => {
     const { email, password } = req.body || {};
-    const user = demoUsers.find((entry) => entry.email === email);
+    const allUsers = usersStore.getUsers();
+    const user = allUsers.find((entry) => entry.email === email);
 
     if (!user) {
       return res.status(401).json({ success: false, message: "Usuario no encontrado" });
     }
 
-    const expectedPassword = `${user.role.toLowerCase()}123`;
-    if (password !== expectedPassword) {
+    const expected = user.password ?? `${user.role.toLowerCase()}123`;
+    if (password !== expected) {
       return res.status(401).json({ success: false, message: "Contraseña incorrecta" });
     }
 

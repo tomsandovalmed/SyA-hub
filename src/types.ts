@@ -7,7 +7,8 @@ export interface User {
   email: string;
   name: string;
   role: Role;
-  clientId?: 'SII' | 'TGR';
+  clientId?: string;
+  password?: string;
 }
 
 export interface AuthCredentials {
@@ -23,7 +24,7 @@ export interface AuthResponse {
 export interface ReportItem {
   id: string;
   title: string;
-  clientId: 'SII' | 'TGR';
+  clientId: string;
   type: string;
   status: string;
   createdAt: string;

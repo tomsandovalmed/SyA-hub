@@ -1,5 +1,5 @@
 import type { AuthCredentials, AuthResponse, ReportItem, User } from '../types';
-import { demoReports, demoUsers } from '../config/auth';
+import { demoReports, usersStore } from '../config/auth';
 
 export const isClientRole = (role: User['role']) => role === 'CLIENT';
 export const canAccessHub = (user?: User | null) => Boolean(user && !isClientRole(user.role));
@@ -22,12 +22,15 @@ export const authenticateUser = async (credentials: AuthCredentials): Promise<Au
     // Fallback local para entorno de desarrollo sin backend activo.
   }
 
-  const user = demoUsers.find((entry) => entry.email === credentials.email);
+  const allUsers = usersStore.getUsers();
+  const user = allUsers.find((entry) => entry.email === credentials.email);
   if (!user) {
     throw new Error('Credenciales inválidas. Prueba con las cuentas demo del panel.');
   }
 
-  if (credentials.password !== `${user.role.toLowerCase()}123`) {
+  // If the user has a custom password, validate against it. Otherwise fall back to role-based demo password.
+  const expected = user.password ?? `${user.role.toLowerCase()}123`;
+  if (credentials.password !== expected) {
     throw new Error('Contraseña incorrecta. Usa la contraseña demo indicada en la vista.');
   }
 
