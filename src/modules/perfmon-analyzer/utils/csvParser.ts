@@ -1,13 +1,13 @@
-import { PerfmonCounterData, ModuleType, ThresholdViolation, ThresholdConfig, MetricKey } from '../types/perfmon.types';
-import { evaluateCounterCondition, detectAlertsForCounter } from './thresholdDetector';
+import { DatosContadorPerfmon, TipoModulo, ViolacionUmbral, ConfiguracionUmbrales, ClaveMetrica } from '../types/perfmon.types';
+import { evaluarCondicionContador, detectarAlertasPorContador } from './thresholdDetector';
 
 export interface ParseResult {
-  counters: PerfmonCounterData[];
-  alerts: ThresholdViolation[];
+  counters: DatosContadorPerfmon[];
+  alerts: ViolacionUmbral[];
   error?: string;
 }
 
-const TARGET_METRICS: { key: MetricKey; pattern: string; name: string; unit: string }[] = [
+const TARGET_METRICS: { key: ClaveMetrica; pattern: string; name: string; unit: string }[] = [
   { key: 'memoria', pattern: 'Memory\\Available MBytes', name: 'Memory Available MBytes', unit: 'MB' },
   { key: 'cpu', pattern: '% Processor Time', name: 'Processor Time %', unit: '%' },
   { key: 'full_scans', pattern: 'Full Scans/sec', name: 'Full Scans/sec', unit: '/sec' },
@@ -18,8 +18,8 @@ const TARGET_METRICS: { key: MetricKey; pattern: string; name: string; unit: str
 
 export const parsePerfmonCsv = (
   csvText: string,
-  moduleType: ModuleType,
-  thresholds: ThresholdConfig,
+  moduleType: TipoModulo,
+  thresholds: ConfiguracionUmbrales,
   saltoPrecision: number = 5
 ): ParseResult => {
   const cleanText = csvText.trim();
@@ -89,9 +89,9 @@ export const parsePerfmonCsv = (
     });
   }
 
-  const generatedAlerts: ThresholdViolation[] = [];
+  const generatedAlerts: ViolacionUmbral[] = [];
 
-  const parsedCounters: PerfmonCounterData[] = colMapping.map((c, idx) => {
+  const parsedCounters: DatosContadorPerfmon[] = colMapping.map((c, idx) => {
     const values = rawData[c.colIdx];
     const min = values.length ? Math.min(...values) : 0;
     const max = values.length ? Math.max(...values) : 0;
@@ -104,39 +104,88 @@ export const parsePerfmonCsv = (
     const stdDev = Math.sqrt(variance);
 
     const counterId = `cnt-${c.metric.key}-${idx}`;
-    const { condition, conditionDetail, limit } = evaluateCounterCondition(
+    const { condicion, detalleCondicion, limite } = evaluarCondicionContador(
       c.metric.key,
       min,
       max,
       thresholds
     );
 
-    const counter: PerfmonCounterData = {
+    const counter: DatosContadorPerfmon = {
       id: counterId,
-      name: `${idx + 1}. ${c.metric.name}`,
-      counterName: headers[c.colIdx],
-      instance: 'default',
-      serverName: c.serverName,
-      module: moduleType,
-      unit: c.metric.unit,
-      metricKey: c.metric.key,
-      condition,
-      conditionDetail,
-      description: `Contador extraído de ${headers[c.colIdx]}`,
-      min,
-      avg,
-      max,
-      stdDev,
-      limit,
-      timeLabels: allTimeLabels,
-      fullTimestamps,
-      values,
+      nombre: `${idx + 1}. ${c.metric.name}`,
+      nombreContador: headers[c.colIdx],
+      instancia: 'default',
+      nombreServidor: c.serverName,
+      modulo: moduleType,
+      unidad: c.metric.unit,
+      claveMetrica: c.metric.key,
+      condicion,
+      detalleCondicion,
+      descripcion: `Contador extraído de ${headers[c.colIdx]}`,
+      minimo: min,
+      promedio: avg,
+      maximo: max,
+      desviacionEstandar: stdDev,
+      limite,
+      etiquetasTiempo: allTimeLabels,
+      timestampsCompletos: fullTimestamps,
+      valores: values,
     };
 
-    generatedAlerts.push(...detectAlertsForCounter(counter, thresholds));
+    generatedAlerts.push(...detectarAlertasPorContador(counter, thresholds));
 
     return counter;
   });
 
   return { counters: parsedCounters, alerts: generatedAlerts };
+};
+
+export const parseMultiplePerfmonCsv = (
+  files: { name: string; text: string }[],
+  moduleType: TipoModulo,
+  thresholds: ConfiguracionUmbrales,
+  saltoPrecision: number = 5
+): ParseResult => {
+  const allCountersMap: Record<string, DatosContadorPerfmon> = {};
+  const allAlerts: ViolacionUmbral[] = [];
+
+  for (const file of files) {
+    const res = parsePerfmonCsv(file.text, moduleType, thresholds, saltoPrecision);
+    // merge counters by id
+    for (const c of res.counters) {
+      const existing = allCountersMap[c.id];
+      if (!existing) {
+        allCountersMap[c.id] = { ...c };
+      } else {
+        // append valores and timestamps
+        const mergedValores = existing.valores.concat(c.valores);
+        const mergedEtiquetas = existing.etiquetasTiempo.concat(c.etiquetasTiempo);
+        const min = mergedValores.length ? Math.min(...mergedValores) : 0;
+        const max = mergedValores.length ? Math.max(...mergedValores) : 0;
+        const sum = mergedValores.reduce((a, b) => a + b, 0);
+        const avg = mergedValores.length ? sum / mergedValores.length : 0;
+        const variance = mergedValores.length
+          ? mergedValores.reduce((acc, val) => acc + Math.pow(val - avg, 2), 0) / mergedValores.length
+          : 0;
+        const stdDev = Math.sqrt(variance);
+
+        allCountersMap[c.id] = {
+          ...existing,
+          valores: mergedValores,
+          etiquetasTiempo: mergedEtiquetas,
+          minimo: min,
+          maximo: max,
+          promedio: avg,
+          desviacionEstandar: stdDev,
+        };
+      }
+    }
+
+    allAlerts.push(...res.alerts);
+  }
+
+  const mergedCounters = Object.values(allCountersMap);
+
+  return { counters: mergedCounters, alerts: allAlerts };
 };

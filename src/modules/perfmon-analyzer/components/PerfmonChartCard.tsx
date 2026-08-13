@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useCallback, memo } from 'react';
-import { PerfmonCounterData, ThresholdViolation } from '../types/perfmon.types';
+import { DatosContadorPerfmon, ViolacionUmbral } from '../types/perfmon.types';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -30,9 +30,9 @@ ChartJS.register(
 );
 
 interface PerfmonChartCardProps {
-  counterData: PerfmonCounterData;
+  counterData: DatosContadorPerfmon;
   counterIndex: number;
-  alerts?: ThresholdViolation[];
+  alerts?: ViolacionUmbral[];
 }
 
 export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChartCard({
@@ -65,7 +65,7 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
         ctx.font = 'bold 12px sans-serif';
         ctx.fillStyle = '#002395';
         ctx.textAlign = 'center';
-        ctx.fillText(`Servidor: ${counterData.serverName} | ${counterData.counterName}`, width / 2, 20);
+        ctx.fillText(`Servidor: ${counterData.nombreServidor} | ${counterData.nombreContador}`, width / 2, 20);
 
         // Leyendas a la derecha
         ctx.textAlign = 'left';
@@ -95,11 +95,11 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
     () => ({
       id: 'thresholdBands',
       beforeDraw: (chart) => {
-        if (!counterData.limit) return;
+        if (!counterData.limite) return;
         const { ctx, chartArea, scales } = chart;
         if (!chartArea || !scales.y) return;
 
-        const limit = counterData.limit;
+        const limit = counterData.limite;
         const warnLimit = limit * 0.7;
         const yLimitPixel = scales.y.getPixelForValue(limit);
         const yWarnPixel = scales.y.getPixelForValue(warnLimit);
@@ -131,17 +131,17 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
         chart.update('none');
 
         const timestamp =
-          counterData.fullTimestamps?.[index] || counterData.timeLabels[index];
+          counterData.timestampsCompletos?.[index] || counterData.etiquetasTiempo[index];
         showToast(`Navegando al punto: ${timestamp}`);
       });
     },
-    [counterData.fullTimestamps, counterData.timeLabels, showToast]
+    [counterData.timestampsCompletos, counterData.etiquetasTiempo, showToast]
   );
 
   const handleDownload = useCallback(() => {
     if (!chartRef.current) return;
     const link = document.createElement('a');
-    link.download = `${counterData.name.replace(/[^a-z0-9]/gi, '_')}.png`;
+    link.download = `${counterData.nombre.replace(/[^a-z0-9]/gi, '_')}.png`;
     link.href = chartRef.current.toBase64Image('image/png', 1.0);
     link.click();
     showToast('Descargando gráfico oficial con leyenda y servidor...');
@@ -150,17 +150,17 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
   // Estructura de datos explícitamente tipada como ChartData<'line'>
   const chartData = useMemo<ChartData<'line'>>(
     () => ({
-      labels: counterData.timeLabels,
+      labels: counterData.etiquetasTiempo,
       datasets: [
         {
-          label: counterData.serverName,
-          data: counterData.values,
+          label: counterData.nombreServidor,
+          data: counterData.valores,
           borderColor: '#002395',
           borderWidth: 2,
           tension: 0.35,
           clip: false, // Previene el recorte de puntos en los bordes
-          pointRadius: counterData.values.map((_, idx) => (idx === highlightedIndex ? 8 : 0)),
-          pointBackgroundColor: counterData.values.map((_, idx) =>
+          pointRadius: counterData.valores.map((_, idx) => (idx === highlightedIndex ? 8 : 0)),
+          pointBackgroundColor: counterData.valores.map((_, idx) =>
             idx === highlightedIndex ? '#ef4444' : '#002395'
           ),
           pointHoverRadius: 6,
@@ -169,7 +169,7 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
         },
       ],
     }),
-    [counterData.timeLabels, counterData.values, counterData.serverName, highlightedIndex]
+    [counterData.etiquetasTiempo, counterData.valores, counterData.nombreServidor, highlightedIndex]
   );
 
   const chartOptions = useMemo<ChartOptions<'line'>>(
@@ -200,12 +200,12 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
           cornerRadius: 8,
           callbacks: {
             title: (items) =>
-              counterData.fullTimestamps?.[items[0].dataIndex] || items[0].label,
+              counterData.timestampsCompletos?.[items[0].dataIndex] || items[0].label,
           },
         },
       },
     }),
-    [counterData.fullTimestamps]
+    [counterData.timestampsCompletos]
   );
 
   // Arreglo de plugins tipado explícitamente como Plugin<'line'>[] para garantizar compatibilidad estricta
@@ -215,9 +215,9 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
   );
 
   const conditionBadgeClass =
-    counterData.condition === 'CRITICAL'
+    counterData.condicion === 'CRITICAL'
       ? 'bg-red-100 text-red-700'
-      : counterData.condition === 'WARNING'
+      : counterData.condicion === 'WARNING'
         ? 'bg-amber-100 text-amber-700'
         : 'bg-green-100 text-green-700';
 
@@ -233,10 +233,10 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-4">
         <div>
           <h3 className="text-lg font-bold text-[#002395]">
-            {counterIndex}. Contador: {counterData.counterName}
+            {counterIndex}. Contador: {counterData.nombreContador}
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            Servidor: <strong className="text-gray-700">{counterData.serverName}</strong>
+            Servidor: <strong className="text-gray-700">{counterData.nombreServidor}</strong>
           </p>
         </div>
 
@@ -268,21 +268,21 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
                 <button
                   type="button"
                   onClick={() => {
-                    navigator.clipboard.writeText(counterData.condition);
-                    showToast('Condition copiada');
+                    navigator.clipboard.writeText(counterData.condicion);
+                    showToast('Condición copiada');
                     setIsMenuOpen(false);
                   }}
                   className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
                 >
-                  <Copy className="w-3.5 h-3.5 text-gray-400" /> Copiar condition
+                  <Copy className="w-3.5 h-3.5 text-gray-400" /> Copiar condición
                 </button>
                 <button
                   type="button"
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      `Min: ${counterData.min} Avg: ${counterData.avg} Max: ${counterData.max}`
+                      `Min: ${counterData.minimo} Avg: ${counterData.promedio} Max: ${counterData.maximo}`
                     );
-                    showToast('Stats copiadas');
+                    showToast('Estadísticas copiadas');
                     setIsMenuOpen(false);
                   }}
                   className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
@@ -301,7 +301,7 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
 
       <div className="space-y-2">
         <h4 className="text-xs font-bold uppercase tracking-wider text-gray-600">
-          OVERALL COUNTER INSTANCE STATISTICS
+          Estadísticas del contador
         </h4>
 
         <div className="overflow-x-auto border border-gray-100 rounded-xl">
@@ -320,19 +320,19 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
               <tr>
                 <td className="p-3 font-sans font-bold">
                   <span className={`px-2.5 py-1 rounded-full text-2xs ${conditionBadgeClass}`}>
-                    {counterData.condition}
+                    {counterData.condicion}
                   </span>
                 </td>
                 <td className="p-3 font-sans text-gray-600 font-medium">
-                  {counterData.conditionDetail || 'Sin anomalías registradas'}
+                  {counterData.detalleCondicion || 'Sin anomalías registradas'}
                 </td>
-                <td className="p-3 text-right font-bold">{counterData.min.toFixed(2)}</td>
+                <td className="p-3 text-right font-bold">{counterData.minimo.toFixed(2)}</td>
                 <td className="p-3 text-right font-bold text-[#002395]">
-                  {counterData.avg.toFixed(2)}
+                  {counterData.promedio.toFixed(2)}
                 </td>
-                <td className="p-3 text-right font-bold">{counterData.max.toFixed(2)}</td>
+                <td className="p-3 text-right font-bold">{counterData.maximo.toFixed(2)}</td>
                 <td className="p-3 text-right text-gray-500">
-                  {(counterData.stdDev || 0).toFixed(2)}
+                  {(counterData.desviacionEstandar || 0).toFixed(2)}
                 </td>
               </tr>
             </tbody>

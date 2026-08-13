@@ -1,53 +1,53 @@
 import {
-  PerfmonCounterData,
-  ThresholdConfig,
-  ThresholdViolation,
-  MetricKey,
+  DatosContadorPerfmon,
+  ConfiguracionUmbrales,
+  ViolacionUmbral,
+  ClaveMetrica,
 } from '../types/perfmon.types';
 
-export interface ConditionResult {
-  condition: 'OK' | 'WARNING' | 'CRITICAL';
-  conditionDetail: string;
-  limit?: number;
+export interface ResultadoCondicion {
+  condicion: 'OK' | 'WARNING' | 'CRITICAL';
+  detalleCondicion: string;
+  limite?: number;
 }
 
-export function evaluateCounterCondition(
-  metricKey: MetricKey | undefined,
-  min: number,
-  max: number,
-  thresholds: ThresholdConfig
-): ConditionResult {
-  switch (metricKey) {
+export function evaluarCondicionContador(
+  claveMetrica: ClaveMetrica | undefined,
+  minimo: number,
+  maximo: number,
+  umbrales: ConfiguracionUmbrales
+): ResultadoCondicion {
+  switch (claveMetrica) {
     case 'cpu': {
-      if (max >= thresholds.cpuCritical) {
+      if (maximo >= umbrales.criticoCpu) {
         return {
-          condition: 'CRITICAL',
-          conditionDetail: `Saturación del procesador por sobre el ${thresholds.cpuCritical}% (Criterio S&A Chile)`,
-          limit: thresholds.cpuCritical,
+          condicion: 'CRITICAL',
+          detalleCondicion: `Saturación del procesador por sobre el ${umbrales.criticoCpu}% (Criterio S&A Chile)`,
+          limite: umbrales.criticoCpu,
         };
       }
-      if (max >= thresholds.cpuWarning) {
+      if (maximo >= umbrales.avisoCpu) {
         return {
-          condition: 'WARNING',
-          conditionDetail: `Carga moderada del procesador (Entre ${thresholds.cpuWarning}% y ${thresholds.cpuCritical}%)`,
-          limit: thresholds.cpuCritical,
+          condicion: 'WARNING',
+          detalleCondicion: `Carga moderada del procesador (Entre ${umbrales.avisoCpu}% y ${umbrales.criticoCpu}%)`,
+          limite: umbrales.criticoCpu,
         };
       }
       break;
     }
     case 'buffer': {
-      if (min <= thresholds.bufferCritical) {
+      if (minimo <= umbrales.criticoBuffer) {
         return {
-          condition: 'CRITICAL',
-          conditionDetail: `Eficiencia crítica de memoria caché (< ${thresholds.bufferCritical}%)`,
-          limit: thresholds.bufferWarning,
+          condicion: 'CRITICAL',
+          detalleCondicion: `Eficiencia crítica de memoria caché (< ${umbrales.criticoBuffer}%)`,
+          limite: umbrales.avisoBuffer,
         };
       }
-      if (min <= thresholds.bufferWarning) {
+      if (minimo <= umbrales.avisoBuffer) {
         return {
-          condition: 'WARNING',
-          conditionDetail: `Lecturas desde disco elevadas (Caché entre ${thresholds.bufferCritical}% y ${thresholds.bufferWarning}%)`,
-          limit: thresholds.bufferWarning,
+          condicion: 'WARNING',
+          detalleCondicion: `Lecturas desde disco elevadas (Caché entre ${umbrales.criticoBuffer}% y ${umbrales.avisoBuffer}%)`,
+          limite: umbrales.avisoBuffer,
         };
       }
       break;
@@ -57,74 +57,80 @@ export function evaluateCounterCondition(
   }
 
   return {
-    condition: 'OK',
-    conditionDetail: 'Rendimiento dentro del rango ideal estándar.',
+    condicion: 'OK',
+    detalleCondicion: 'Rendimiento dentro del rango ideal estándar.',
   };
 }
 
-export function detectAlertsForCounter(
+export function detectarAlertasPorContador(
   counter: Pick<
-    PerfmonCounterData,
-    'id' | 'metricKey' | 'name' | 'counterName' | 'values' | 'timeLabels' | 'fullTimestamps'
+    DatosContadorPerfmon,
+    | 'id'
+    | 'claveMetrica'
+    | 'nombre'
+    | 'nombreContador'
+    | 'valores'
+    | 'etiquetasTiempo'
+    | 'timestampsCompletos'
   >,
-  thresholds: ThresholdConfig
-): ThresholdViolation[] {
-  const alerts: ThresholdViolation[] = [];
-  const { metricKey, values, id, name, counterName } = counter;
-  const timeLabels = counter.timeLabels;
-  const fullTimestamps = counter.fullTimestamps ?? timeLabels;
+  umbrales: ConfiguracionUmbrales
+): ViolacionUmbral[] {
+  const alerts: ViolacionUmbral[] = [];
+  const { claveMetrica, valores, id, nombre, nombreContador } = counter;
+  const timeLabels = counter.etiquetasTiempo;
+  const fullTimestamps = counter.timestampsCompletos ?? timeLabels;
 
-  values.forEach((value, index) => {
-    if (metricKey === 'cpu') {
-      if (value >= thresholds.cpuCritical) {
+  valores.forEach((value, index) => {
+    if (claveMetrica === 'cpu') {
+      if (value >= umbrales.criticoCpu) {
         alerts.push({
           id: `alert-${id}-crit-${index}`,
-          counterId: id,
-          dataIndex: index,
-          timeRange: fullTimestamps[index] || timeLabels[index],
-          condition: `Procesador >= ${thresholds.cpuCritical}%`,
-          severity: 'CRITICAL',
-          counter: counterName || name,
-          avgValue: value,
-          limit: thresholds.cpuCritical,
+          contadorId: id,
+          indiceDatos: index,
+          rangoTemporal: fullTimestamps[index] || timeLabels[index],
+          condicion: `Procesador >= ${umbrales.criticoCpu}%`,
+          severidad: 'CRITICAL',
+          contador: nombreContador || nombre,
+          valorPromedio: value,
+          limite: umbrales.criticoCpu,
         });
-      } else if (value >= thresholds.cpuWarning) {
+      } else if (value >= umbrales.avisoCpu) {
         alerts.push({
           id: `alert-${id}-warn-${index}`,
-          counterId: id,
-          dataIndex: index,
-          timeRange: fullTimestamps[index] || timeLabels[index],
-          condition: `Procesador >= ${thresholds.cpuWarning}%`,
-          severity: 'WARNING',
-          counter: counterName || name,
-          avgValue: value,
-          limit: thresholds.cpuWarning,
+          contadorId: id,
+          indiceDatos: index,
+          rangoTemporal: fullTimestamps[index] || timeLabels[index],
+          condicion: `Procesador >= ${umbrales.avisoCpu}%`,
+          severidad: 'WARNING',
+          contador: nombreContador || nombre,
+          valorPromedio: value,
+          limite: umbrales.avisoCpu,
         });
       }
-    } else if (metricKey === 'buffer') {
-      if (value <= thresholds.bufferCritical) {
+    } else if (claveMetrica === 'buffer') {
+      if (value <= umbrales.criticoBuffer) {
         alerts.push({
           id: `alert-${id}-crit-${index}`,
-          counterId: id,
-          dataIndex: index,
-          timeRange: fullTimestamps[index] || timeLabels[index],
-          condition: `Buffer Cache <= ${thresholds.bufferCritical}%`,
-          severity: 'CRITICAL',
-          counter: counterName || name,
-          avgValue: value,
-          limit: thresholds.bufferCritical,
+          contadorId: id,
+          indiceDatos: index,
+          rangoTemporal: fullTimestamps[index] || timeLabels[index],
+          condicion: `Buffer Cache <= ${umbrales.criticoBuffer}%`,
+          severidad: 'CRITICAL',
+          contador: nombreContador || nombre,
+          valorPromedio: value,
+          limite: umbrales.criticoBuffer,
         });
-      } else if (value <= thresholds.bufferWarning) {
+      } else if (value <= umbrales.avisoBuffer) {
         alerts.push({
           id: `alert-${id}-warn-${index}`,
-          counterId: id,
-          dataIndex: index,
-          timeRange: fullTimestamps[index] || timeLabels[index],
-          condition: `Buffer Cache <= ${thresholds.bufferWarning}%`,
-          severity: 'WARNING',
-          counter: counterName || name,
-          avgValue: value,
-          limit: thresholds.bufferWarning,
+          contadorId: id,
+          indiceDatos: index,
+          rangoTemporal: fullTimestamps[index] || timeLabels[index],
+          condicion: `Buffer Cache <= ${umbrales.avisoBuffer}%`,
+          severidad: 'WARNING',
+          contador: nombreContador || nombre,
+          valorPromedio: value,
+          limite: umbrales.avisoBuffer,
         });
       }
     }
@@ -133,22 +139,22 @@ export function detectAlertsForCounter(
   return alerts;
 }
 
-export function analyzeCounters(
-  counters: PerfmonCounterData[],
-  thresholds: ThresholdConfig
-): { counters: PerfmonCounterData[]; alerts: ThresholdViolation[] } {
+export function analizarContadores(
+  counters: DatosContadorPerfmon[],
+  umbrales: ConfiguracionUmbrales
+): { counters: DatosContadorPerfmon[]; alerts: ViolacionUmbral[] } {
   const updatedCounters = counters.map((counter) => {
-    const { condition, conditionDetail, limit } = evaluateCounterCondition(
-      counter.metricKey,
-      counter.min,
-      counter.max,
-      thresholds
+    const { condicion, detalleCondicion, limite } = evaluarCondicionContador(
+      counter.claveMetrica,
+      counter.minimo,
+      counter.maximo,
+      umbrales
     );
-    return { ...counter, condition, conditionDetail, limit };
+    return { ...counter, condicion, detalleCondicion, limite };
   });
 
   const alerts = updatedCounters.flatMap((counter) =>
-    detectAlertsForCounter(counter, thresholds)
+    detectarAlertasPorContador(counter, umbrales)
   );
 
   return { counters: updatedCounters, alerts };

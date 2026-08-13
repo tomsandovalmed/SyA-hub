@@ -1,4 +1,4 @@
-export type { ViewMode, ModuleType, MetricKey, PerfmonCounterData, ThresholdViolation, OperationHistoryItem, ThresholdConfig } from './modules/perfmon-analyzer/types/perfmon.types';
+export type { ModoVista, TipoModulo, ClaveMetrica, DatosContadorPerfmon, ViolacionUmbral, ItemHistorialOperacion, ConfiguracionUmbrales } from './modules/perfmon-analyzer/types/perfmon.types';
 
 export type Role = 'ADMIN' | 'WORKER' | 'CLIENT';
 

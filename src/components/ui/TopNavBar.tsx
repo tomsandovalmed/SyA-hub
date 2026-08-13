@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { ViewMode, ModuleType } from '../../modules/perfmon-analyzer/types/perfmon.types';
+import { ModoVista, TipoModulo } from '../../modules/perfmon-analyzer/types/perfmon.types';
 import { Bell, Settings, LayoutGrid, Clock, CheckSquare, ChevronDown, LogOut, UserCircle } from 'lucide-react';
 import type { User } from '../../types';
 
 interface TopNavBarProps {
-  currentView: ViewMode;
-  selectedModule: ModuleType;
+  currentView: ModoVista;
+  selectedModule: TipoModulo;
   authUser: User;
-  onNavigate: (view: ViewMode) => void;
+  onNavigate: (view: ModoVista) => void;
   onLogout: () => void;
 }
 
@@ -40,7 +40,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({ currentView, selectedModul
               </div>
               <div className="h-5 w-px bg-gray-300 hidden sm:block" />
               <span className="hidden sm:inline-block text-xs font-semibold text-[#002395] tracking-tight uppercase">
-                Data Analysis Hub
+                Centro de Herramientas
               </span>
             </button>
           </div>

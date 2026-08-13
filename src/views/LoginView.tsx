@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Lock, Mail, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Footer } from '../components/ui/Footer';
 import type { AuthCredentials, User } from '../types';
 import { authenticateUser } from '../core/auth';
 
@@ -52,7 +53,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
               </div>
               <div className="h-5 w-px bg-slate-300 hidden sm:block" />
               <span className="hidden sm:inline-block text-xs font-semibold text-[#002395] tracking-tight uppercase">
-                Data Analysis Hub
+                Centro de Herramientas
               </span>
             </div>
           </div>
@@ -136,9 +137,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
       </main>
 
       {/* Footer corporativo ligero integrado */}
-      <footer className="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400 font-medium">
-        © 2026 S&A CHILE - DATA ANALYSIS HUB. TODOS LOS DERECHOS RESERVADOS.
-      </footer>
+      <Footer />
     </div>
   );
 };

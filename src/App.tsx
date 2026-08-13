@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import {
-  ViewMode,
-  ModuleType,
-  PerfmonCounterData,
-  ThresholdViolation,
-  OperationHistoryItem,
-  ThresholdConfig,
+  ModoVista,
+  TipoModulo,
+  DatosContadorPerfmon,
+  ViolacionUmbral,
+  ItemHistorialOperacion,
+  ConfiguracionUmbrales,
 } from "./modules/perfmon-analyzer/types/perfmon.types";
 import { initialOperationHistory } from "./modules/perfmon-analyzer/data/mockPerfmonData";
-import { analyzeCounters } from "./modules/perfmon-analyzer/utils/thresholdDetector";
+import { analizarContadores } from "./modules/perfmon-analyzer/utils/thresholdDetector";
 import { TopNavBar } from "./components/ui/TopNavBar";
 import { InicioVista } from "./views/InicioVista";
 import { HistorialVista } from "./views/HistorialVista";
@@ -24,43 +24,43 @@ import type { User } from "./types";
 // ============================================================================
 // CONFIGURACIÓN DE UMBRALES DE RESPALDO (S&A CHILE STANDARDS)
 // ============================================================================
-const defaultThresholds: ThresholdConfig = {
-  memoryPagesSecLimit: 20,
-  cpuWarning: 50,
-  cpuCritical: 80,
-  cacheHitRatioOLTP: 95,
-  cacheHitRatioOLAP: 80,
-  sqlCompilationsSecLimit: 100,
-  locksSecLimit: 1000,
-  bufferWarning: 95,
-  bufferCritical: 80,
+const defaultThresholds: ConfiguracionUmbrales = {
+  limitePaginasMemoriaPorSeg: 20,
+  avisoCpu: 50,
+  criticoCpu: 80,
+  proporcionAciertoCacheOLTP: 95,
+  proporcionAciertoCacheOLAP: 80,
+  limiteCompilacionesSqlPorSeg: 100,
+  limiteBloqueosPorSeg: 1000,
+  avisoBuffer: 95,
+  criticoBuffer: 80,
 };
 
 export default function App() {
   // ==========================================
   // ESTADOS PRINCIPALES DE LA APLICACIÓN
   // ==========================================
-  const [currentView, setCurrentView] = useState<ViewMode>("hub");
-  const [selectedModule, setSelectedModule] = useState<ModuleType>("SII");
+  const [currentView, setCurrentView] = useState<ModoVista>("hub");
+  const [selectedModule, setSelectedModule] = useState<TipoModulo>("SII");
   const [authUser, setAuthUser] = useState<User | null>(null);
-  const [thresholdConfig, setThresholdConfig] = useState<ThresholdConfig>(defaultThresholds);
-  const [history, setHistory] = useState<OperationHistoryItem[]>(initialOperationHistory);
+  const [thresholdConfig, setThresholdConfig] = useState<ConfiguracionUmbrales>(defaultThresholds);
+  const [history, setHistory] = useState<ItemHistorialOperacion[]>(initialOperationHistory);
 
   // 🟢 ESTADO INICIAL VACÍO PARA CONTADORES Y ALERTAS
-  const [counters, setCounters] = useState<PerfmonCounterData[]>([]);
-  const [alerts, setAlerts] = useState<ThresholdViolation[]>([]);
+  const [counters, setCounters] = useState<DatosContadorPerfmon[]>([]);
+  const [alerts, setAlerts] = useState<ViolacionUmbral[]>([]);
 
   // ==========================================
   // MANEJADORES DE CAMBIO DE MÓDULO Y NAVEGACIÓN
   // ==========================================
 
-  const handleModuleChange = (module: ModuleType) => {
+  const handleModuleChange = (module: TipoModulo) => {
     setSelectedModule(module);
     setCounters([]);
     setAlerts([]);
   };
 
-  const handleSelectModule = (module: ModuleType) => {
+  const handleSelectModule = (module: TipoModulo) => {
     setSelectedModule(module);
     setCounters([]);
     setAlerts([]);
@@ -82,14 +82,14 @@ export default function App() {
   // ==========================================
 
   const handleAnalyzeFile = (
-    parsedCounters: PerfmonCounterData[],
-    parsedAlerts: ThresholdViolation[],
+    parsedCounters: DatosContadorPerfmon[],
+    parsedAlerts: ViolacionUmbral[],
     filename: string
   ) => {
     setCounters(parsedCounters);
     setAlerts(parsedAlerts);
 
-    const newItem: OperationHistoryItem = {
+    const newItem: ItemHistorialOperacion = {
       id: `op-${Date.now()}`,
       herramienta: `Perfmon Diagnostics (${selectedModule})`,
       usuario: "T. Sandoval",
@@ -106,11 +106,11 @@ export default function App() {
     setHistory((prev) => [newItem, ...prev]);
   };
 
-  const handleUpdateThresholds = async (newConfig: ThresholdConfig) => {
+  const handleUpdateThresholds = async (newConfig: ConfiguracionUmbrales) => {
     setThresholdConfig(newConfig);
 
     if (counters.length > 0) {
-      const { counters: updatedCounters, alerts: updatedAlerts } = analyzeCounters(
+      const { counters: updatedCounters, alerts: updatedAlerts } = analizarContadores(
         counters,
         newConfig
       );

@@ -1,15 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { ThresholdViolation } from '../types/perfmon.types';
+import { ViolacionUmbral } from '../types/perfmon.types';
 import { AlertTriangle, ChevronDown, ChevronUp, MapPin } from 'lucide-react';
 
 const INITIAL_VISIBLE_COUNT = 5;
 
 interface DetectedAlertsSectionProps {
-  alerts: ThresholdViolation[];
+  alerts: ViolacionUmbral[];
   onNavigateToChart: (dataIndex: number) => void;
 }
 
-const severityStyles: Record<ThresholdViolation['severity'], string> = {
+const severityStyles: Record<ViolacionUmbral['severidad'], string> = {
   CRITICAL: 'bg-red-100 text-red-700',
   WARNING: 'bg-amber-100 text-amber-700',
   INFO: 'bg-blue-100 text-blue-700',
@@ -26,8 +26,8 @@ export const DetectedAlertsSection: React.FC<DetectedAlertsSectionProps> = ({
     [alerts, showAll]
   );
 
-  const criticalCount = alerts.filter((a) => a.severity === 'CRITICAL').length;
-  const warningCount = alerts.filter((a) => a.severity === 'WARNING').length;
+  const criticalCount = alerts.filter((a) => a.severidad === 'CRITICAL').length;
+  const warningCount = alerts.filter((a) => a.severidad === 'WARNING').length;
 
   if (alerts.length === 0) {
     return (
@@ -80,23 +80,23 @@ export const DetectedAlertsSection: React.FC<DetectedAlertsSectionProps> = ({
           <tbody className="divide-y divide-gray-100 text-gray-700">
             {visibleAlerts.map((alert) => (
               <tr key={alert.id} className="hover:bg-slate-50/80 transition-colors">
-                <td className="p-3 font-mono text-gray-600 whitespace-nowrap">{alert.timeRange}</td>
+                <td className="p-3 font-mono text-gray-600 whitespace-nowrap">{alert.rangoTemporal}</td>
                 <td className="p-3">
                   <span
-                    className={`px-2 py-0.5 rounded-full text-2xs font-bold ${severityStyles[alert.severity]}`}
+                    className={`px-2 py-0.5 rounded-full text-2xs font-bold ${severityStyles[alert.severidad]}`}
                   >
-                    {alert.severity}
+                    {alert.severidad}
                   </span>
                 </td>
-                <td className="p-3 font-medium text-gray-800">{alert.condition}</td>
+                <td className="p-3 font-medium text-gray-800">{alert.condicion}</td>
                 <td className="p-3 text-right font-mono font-bold text-gray-900">
-                  {alert.avgValue.toFixed(2)}
+                  {alert.valorPromedio.toFixed(2)}
                 </td>
                 <td className="p-3 text-center">
                   <button
                     type="button"
-                    onClick={() => alert.dataIndex !== undefined && onNavigateToChart(alert.dataIndex)}
-                    disabled={alert.dataIndex === undefined}
+                    onClick={() => alert.indiceDatos !== undefined && onNavigateToChart(alert.indiceDatos)}
+                    disabled={alert.indiceDatos === undefined}
                     className="bg-blue-50 hover:bg-blue-100 text-[#002395] border border-blue-200 px-2.5 py-1 rounded-lg text-2xs font-bold inline-flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <MapPin className="w-3 h-3" />

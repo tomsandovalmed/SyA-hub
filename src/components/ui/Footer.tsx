@@ -7,7 +7,7 @@ export const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           
           <div className="text-xs text-gray-500 font-medium text-center md:text-left">
-            <p>© 2024 DATA ANALYSIS HUB. BUILT WITH PRECISION.</p>
+            <p>© 2026 S&A CHILE - CENTRO DE HERRAMIENTAS. TODOS LOS DERECHOS RESERVADOS.</p>
             <div className="mt-2 flex justify-center md:justify-start space-x-4">
               <a href="#docs" onClick={(e) => e.preventDefault()} className="text-gray-600 hover:text-[#002395] underline transition-colors">
                 Documentación

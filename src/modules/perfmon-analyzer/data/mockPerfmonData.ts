@@ -1,18 +1,18 @@
-import { PerfmonCounterData, ThresholdViolation, OperationHistoryItem, ThresholdConfig, ModuleType } from '../types/perfmon.types';
+import { DatosContadorPerfmon, ViolacionUmbral, ItemHistorialOperacion, ConfiguracionUmbrales, TipoModulo } from '../types/perfmon.types';
 
-export const initialThresholds: ThresholdConfig = {
-  memoryPagesSecLimit: 20,
-  cpuWarning: 50,
-  cpuCritical: 80,
-  cacheHitRatioOLTP: 95,
-  cacheHitRatioOLAP: 80,
-  sqlCompilationsSecLimit: 100,
-  locksSecLimit: 1000,
-  bufferWarning: 95,
-  bufferCritical: 80,
+export const initialThresholds: ConfiguracionUmbrales = {
+  limitePaginasMemoriaPorSeg: 20,
+  avisoCpu: 50,
+  criticoCpu: 80,
+  proporcionAciertoCacheOLTP: 95,
+  proporcionAciertoCacheOLAP: 80,
+  limiteCompilacionesSqlPorSeg: 100,
+  limiteBloqueosPorSeg: 1000,
+  avisoBuffer: 95,
+  criticoBuffer: 80,
 };
 
-export const initialOperationHistory: OperationHistoryItem[] = [
+export const initialOperationHistory: ItemHistorialOperacion[] = [
   {
     id: 'op-1',
     herramienta: 'Perfmon Diagnostics (SII)',
@@ -32,7 +32,7 @@ export const initialOperationHistory: OperationHistoryItem[] = [
 ];
 
 // Función para parsear/generar los contadores Reales cuando se procese un CSV/BLG
-export const getSamplePerfmonCounters = (moduleType: ModuleType): PerfmonCounterData[] => {
+export const getSamplePerfmonCounters = (moduleType: TipoModulo): DatosContadorPerfmon[] => {
   const isSII = moduleType === 'SII';
   const serverName = isSII ? 'ESCORPIO_SQL_SRV' : 'PERSONALNEW';
   const commonTimeLabels = ['08:00', '08:15', '08:30', '08:45', '09:00', '09:15'];
@@ -41,20 +41,20 @@ export const getSamplePerfmonCounters = (moduleType: ModuleType): PerfmonCounter
     return [
       {
         id: 'mem-avail-sii',
-        name: 'Memory Available MBytes',
-        counterName: '\\Memory\\Available MBytes',
-        instance: 'System',
-        serverName,
-        module: 'SII',
-        condition: 'OK',
-        unit: 'MB',
-        description: 'Métrica de memoria RAM física disponible para procesos del sistema.',
-        min: 1061.00,
-        avg: 1518.71,
-        max: 2124.00,
-        limit: 1000.00,
-        timeLabels: commonTimeLabels,
-        values: [1650, 1520, 1800, 1720, 1850, 1450],
+        nombre: 'Memory Available MBytes',
+        nombreContador: '\\Memory\\Available MBytes',
+        instancia: 'System',
+        nombreServidor: serverName,
+        modulo: 'SII',
+        condicion: 'OK',
+        unidad: 'MB',
+        descripcion: 'Métrica de memoria RAM física disponible para procesos del sistema.',
+        minimo: 1061.0,
+        promedio: 1518.71,
+        maximo: 2124.0,
+        limite: 1000.0,
+        etiquetasTiempo: commonTimeLabels,
+        valores: [1650, 1520, 1800, 1720, 1850, 1450],
       },
       {
         id: 'cpu-proc-sii',
@@ -148,20 +148,20 @@ export const getSamplePerfmonCounters = (moduleType: ModuleType): PerfmonCounter
   return [
     {
       id: 'mem-avail-tgr',
-      name: 'Memory Available MBytes',
-      counterName: '\\\\PERSONALNEW\\Memory\\Available MBytes',
-      instance: 'System',
-      serverName,
-      module: 'TGR',
-      condition: 'OK',
-      unit: 'MB',
-      description: 'Memoria física disponible en el servidor de recaudación TGR.',
-      min: 800.00,
-      avg: 1450.00,
-      max: 2100.00,
-      limit: 1000.00,
-      timeLabels: commonTimeLabels,
-      values: [800, 1100, 1450, 1800, 2100, 1600],
+      nombre: 'Memory Available MBytes',
+      nombreContador: '\\\\PERSONALNEW\\Memory\\Available MBytes',
+      instancia: 'System',
+      nombreServidor: serverName,
+      modulo: 'TGR',
+      condicion: 'OK',
+      unidad: 'MB',
+      descripcion: 'Memoria física disponible en el servidor de recaudación TGR.',
+      minimo: 800.0,
+      promedio: 1450.0,
+      maximo: 2100.0,
+      limite: 1000.0,
+      etiquetasTiempo: commonTimeLabels,
+      valores: [800, 1100, 1450, 1800, 2100, 1600],
     },
     {
       id: 'cpu-proc-tgr',
@@ -234,7 +234,7 @@ export const getSamplePerfmonCounters = (moduleType: ModuleType): PerfmonCounter
   ];
 };
 
-export const getSampleAlerts = (moduleType: ModuleType): ThresholdViolation[] => {
+export const getSampleAlerts = (moduleType: TipoModulo): ViolacionUmbral[] => {
   const isSII = moduleType === 'SII';
   const cpuCounter = isSII 
     ? '\\Processor(*)\\% Processor Time' 
@@ -243,13 +243,13 @@ export const getSampleAlerts = (moduleType: ModuleType): ThresholdViolation[] =>
   return [
     {
       id: 'alert-1',
-      counterId: isSII ? 'cpu-proc-sii' : 'cpu-proc-tgr',
-      timeRange: '06/27/2026 00:03 - 23:48',
-      condition: 'CRITICAL CPU > 80%',
-      severity: 'CRITICAL',
-      counter: cpuCounter,
-      avgValue: isSII ? 84.46 : 89.38,
-      limit: 80.00,
+      contadorId: isSII ? 'cpu-proc-sii' : 'cpu-proc-tgr',
+      rangoTemporal: '06/27/2026 00:03 - 23:48',
+      condicion: 'CRITICAL CPU > 80%',
+      severidad: 'CRITICAL',
+      contador: cpuCounter,
+      valorPromedio: isSII ? 84.46 : 89.38,
+      limite: 80.0,
     },
   ];
 };

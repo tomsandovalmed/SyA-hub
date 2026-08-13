@@ -1,8 +1,8 @@
-export type ViewMode = 'hub' | 'module-select' | 'analyzer' | 'history' | 'tasks' | 'client' | 'admin';
+export type ModoVista = 'hub' | 'module-select' | 'analyzer' | 'history' | 'tasks' | 'client' | 'admin';
 
-export type ModuleType = 'SII' | 'TGR';
+export type TipoModulo = 'SII' | 'TGR';
 
-export type MetricKey =
+export type ClaveMetrica =
   | 'memoria'
   | 'cpu'
   | 'full_scans'
@@ -10,57 +10,57 @@ export type MetricKey =
   | 'transacciones'
   | 'conexiones';
 
-export interface PerfmonCounterData {
+export interface DatosContadorPerfmon {
   id: string;
-  name: string;
-  counterName: string;
-  instance: string;
-  serverName: string;
-  module: ModuleType;
-  unit: string;
-  metricKey?: MetricKey;
-  condition: 'OK' | 'WARNING' | 'CRITICAL';
-  conditionDetail?: string;
-  description: string;
-  min: number;
-  avg: number;
-  max: number;
-  stdDev?: number;
-  limit?: number;
-  timeLabels: string[];
-  fullTimestamps?: string[];
-  values: number[];
+  nombre: string;
+  nombreContador: string;
+  instancia: string;
+  nombreServidor: string;
+  modulo: TipoModulo;
+  unidad: string;
+  claveMetrica?: ClaveMetrica;
+  condicion: 'OK' | 'WARNING' | 'CRITICAL';
+  detalleCondicion?: string;
+  descripcion: string;
+  minimo: number;
+  promedio: number;
+  maximo: number;
+  desviacionEstandar?: number;
+  limite?: number;
+  etiquetasTiempo: string[];
+  timestampsCompletos?: string[];
+  valores: number[];
 }
 
-export interface ThresholdViolation {
+export interface ViolacionUmbral {
   id: string;
-  counterId: string;
-  dataIndex?: number;
-  timeRange: string;
-  condition: string;
-  severity: 'CRITICAL' | 'WARNING' | 'INFO';
-  counter: string;
-  avgValue: number;
-  limit: number;
+  contadorId: string;
+  indiceDatos?: number;
+  rangoTemporal: string;
+  condicion: string;
+  severidad: 'CRITICAL' | 'WARNING' | 'INFO';
+  contador: string;
+  valorPromedio: number;
+  limite: number;
 }
 
-export interface OperationHistoryItem {
+export interface ItemHistorialOperacion {
   id: string;
   herramienta: string;
   usuario: string;
   fecha: string;
   estado: 'Completado' | 'Pendiente' | 'En Proceso' | 'Error';
-  modulo?: ModuleType;
+  modulo?: TipoModulo;
 }
 
-export interface ThresholdConfig {
-  memoryPagesSecLimit: number;
-  cpuWarning: number;
-  cpuCritical: number;
-  cacheHitRatioOLTP: number;
-  cacheHitRatioOLAP: number;
-  sqlCompilationsSecLimit: number;
-  locksSecLimit: number;
-  bufferWarning: number;
-  bufferCritical: number;
+export interface ConfiguracionUmbrales {
+  limitePaginasMemoriaPorSeg: number;
+  avisoCpu: number;
+  criticoCpu: number;
+  proporcionAciertoCacheOLTP: number;
+  proporcionAciertoCacheOLAP: number;
+  limiteCompilacionesSqlPorSeg: number;
+  limiteBloqueosPorSeg: number;
+  avisoBuffer: number;
+  criticoBuffer: number;
 }
