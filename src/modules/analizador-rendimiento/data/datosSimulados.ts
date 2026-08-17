@@ -1,4 +1,4 @@
-import { DatosContadorPerfmon, ViolacionUmbral, ItemHistorialOperacion, ConfiguracionUmbrales, TipoModulo } from '../types/perfmon.types';
+import { DatosContadorPerfmon, ViolacionUmbral, ItemHistorialOperacion, ConfiguracionUmbrales, TipoModulo } from '../types/tiposAnalizador';
 
 export const initialThresholds: ConfiguracionUmbrales = {
   limitePaginasMemoriaPorSeg: 20,

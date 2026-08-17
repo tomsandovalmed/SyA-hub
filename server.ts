@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
-import { getSamplePerfmonCounters, getSampleAlerts, initialOperationHistory, initialThresholds } from "./src/modules/perfmon-analyzer/data/mockPerfmonData";
+import { getSamplePerfmonCounters, getSampleAlerts, initialOperationHistory, initialThresholds } from "./src/modules/analizador-rendimiento/data/datosSimulados";
 import { demoReports, usersStore } from "./src/config/auth";
 
 async function startServer() {

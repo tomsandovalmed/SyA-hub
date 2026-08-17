@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PerfmonCounterData, ThresholdViolation, ModuleType } from '../types/perfmon.types';
+import { PerfmonCounterData, ThresholdViolation, ModuleType } from '../types/tiposAnalizador';
 import { FileText, Download, Check, X, FileSpreadsheet, Code2 } from 'lucide-react';
 
 interface ReportExportModalProps {
@@ -11,7 +11,7 @@ interface ReportExportModalProps {
   onClose: () => void;
 }
 
-export const ReportExportModal: React.FC<ReportExportModalProps> = ({
+export const ModalExportarReporte: React.FC<ReportExportModalProps> = ({
   isOpen,
   selectedModule,
   selectedFileName,

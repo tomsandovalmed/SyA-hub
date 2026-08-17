@@ -6,14 +6,14 @@ import {
   ViolacionUmbral,
   ItemHistorialOperacion,
   ConfiguracionUmbrales,
-} from "./modules/perfmon-analyzer/types/perfmon.types";
-import { initialOperationHistory } from "./modules/perfmon-analyzer/data/mockPerfmonData";
-import { analizarContadores } from "./modules/perfmon-analyzer/utils/thresholdDetector";
+} from "./modules/analizador-rendimiento/types/tiposAnalizador";
+import { initialOperationHistory } from "./modules/analizador-rendimiento/data/datosSimulados";
+import { analizarContadores } from "./modules/analizador-rendimiento/utils/detectorUmbrales";
 import { TopNavBar } from "./components/ui/TopNavBar";
 import { InicioVista } from "./views/InicioVista";
 import { HistorialVista } from "./views/HistorialVista";
-import { SeleccionModulo } from "./modules/perfmon-analyzer/components/SeleccionModulo";
-import { PerfmonAnalyzerView } from "./modules/perfmon-analyzer/PerfmonAnalyzerView";
+import { SeleccionModulo } from "./modules/analizador-rendimiento/components/SeleccionModulo";
+import { VistaAnalizadorRendimiento } from "./modules/analizador-rendimiento/VistaAnalizadorRendimiento";
 import { Footer } from "./components/ui/Footer";
 import { NotasYTareas } from "./views/NotasYTareas";
 import { LoginView } from "./views/LoginView";
@@ -181,7 +181,7 @@ export default function App() {
         )}
 
         {currentView === "analyzer" && (
-          <PerfmonAnalyzerView
+          <VistaAnalizadorRendimiento
             selectedModule={selectedModule}
             onChangeModule={(mod) => handleModuleChange(mod)}
             counters={counters}

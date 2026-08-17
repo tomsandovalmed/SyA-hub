@@ -1,5 +1,5 @@
 import React from 'react';
-import { ViewMode, OperationHistoryItem } from '../modules/perfmon-analyzer/types/perfmon.types';
+import { ViewMode, OperationHistoryItem } from '../modules/analizador-rendimiento/types/tiposAnalizador';
 import { Clock, CheckCircle2, AlertCircle, ChevronRight } from 'lucide-react';
 
 interface HistorialVistaProps {
