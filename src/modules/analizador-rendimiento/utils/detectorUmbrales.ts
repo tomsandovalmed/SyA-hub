@@ -3,7 +3,7 @@ import {
   ConfiguracionUmbrales,
   ViolacionUmbral,
   ClaveMetrica,
-} from '../types/perfmon.types';
+} from '../types/tiposAnalizador';
 
 export interface ResultadoCondicion {
   condicion: 'OK' | 'WARNING' | 'CRITICAL';

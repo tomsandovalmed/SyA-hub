@@ -1,4 +1,4 @@
-export type { ModoVista, TipoModulo, ClaveMetrica, DatosContadorPerfmon, ViolacionUmbral, ItemHistorialOperacion, ConfiguracionUmbrales } from './modules/perfmon-analyzer/types/perfmon.types';
+export type { ModoVista, TipoModulo, ClaveMetrica, DatosContadorPerfmon, ViolacionUmbral, ItemHistorialOperacion, ConfiguracionUmbrales } from './modules/analizador-rendimiento/types/tiposAnalizador';
 
 export type Role = 'ADMIN' | 'WORKER' | 'CLIENT';
 

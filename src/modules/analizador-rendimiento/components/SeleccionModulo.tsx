@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ModuleType, ViewMode } from '../types/perfmon.types';
+import { ModuleType, ViewMode } from '../types/tiposAnalizador';
 import { Landmark, Receipt, ArrowRight, Info, ChevronRight, BookOpen, X } from 'lucide-react';
 
 interface ModuleSelectionViewProps {

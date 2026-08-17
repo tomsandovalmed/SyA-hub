@@ -1,5 +1,5 @@
 import React from 'react';
-import { ModuleType } from '../modules/perfmon-analyzer/types/perfmon.types';
+import { ModuleType } from '../modules/analizador-rendimiento/types/tiposAnalizador';
 import { Rocket, BarChart3, Play, Database } from 'lucide-react';
 
 interface InicioVistaProps {

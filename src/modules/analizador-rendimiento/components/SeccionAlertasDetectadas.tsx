@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ViolacionUmbral } from '../types/perfmon.types';
+import { ViolacionUmbral } from '../types/tiposAnalizador';
 import { AlertTriangle, ChevronDown, ChevronUp, MapPin } from 'lucide-react';
 
 const INITIAL_VISIBLE_COUNT = 5;
@@ -15,7 +15,7 @@ const severityStyles: Record<ViolacionUmbral['severidad'], string> = {
   INFO: 'bg-blue-100 text-blue-700',
 };
 
-export const DetectedAlertsSection: React.FC<DetectedAlertsSectionProps> = ({
+export const SeccionAlertasDetectadas: React.FC<DetectedAlertsSectionProps> = ({
   alerts,
   onNavigateToChart,
 }) => {

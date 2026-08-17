@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ModoVista, TipoModulo } from '../../modules/perfmon-analyzer/types/perfmon.types';
+import { ModoVista, TipoModulo } from '../../modules/analizador-rendimiento/types/tiposAnalizador';
 import { Bell, Settings, LayoutGrid, Clock, CheckSquare, ChevronDown, LogOut, UserCircle } from 'lucide-react';
 import type { User } from '../../types';
 

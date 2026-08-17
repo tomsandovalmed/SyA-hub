@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useCallback, memo } from 'react';
-import { DatosContadorPerfmon, ViolacionUmbral } from '../types/perfmon.types';
+import { DatosContadorPerfmon, ViolacionUmbral } from '../types/tiposAnalizador';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -16,7 +16,7 @@ import {
   Plugin,
 } from 'chart.js';
 import { Download, Copy, ChevronDown, Check } from 'lucide-react';
-import { DetectedAlertsSection } from './DetectedAlertsSection';
+import { SeccionAlertasDetectadas } from './SeccionAlertasDetectadas';
 
 ChartJS.register(
   CategoryScale,
@@ -35,7 +35,7 @@ interface PerfmonChartCardProps {
   alerts?: ViolacionUmbral[];
 }
 
-export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChartCard({
+export const TarjetaGraficoRendimiento = memo<PerfmonChartCardProps>(function TarjetaGraficoRendimiento({
   counterData,
   counterIndex,
   alerts = [],
@@ -340,7 +340,7 @@ export const PerfmonChartCard = memo<PerfmonChartCardProps>(function PerfmonChar
         </div>
       </div>
 
-      <DetectedAlertsSection alerts={alerts} onNavigateToChart={handleNavigateToChart} />
+      <SeccionAlertasDetectadas alerts={alerts} onNavigateToChart={handleNavigateToChart} />
     </div>
   );
 });

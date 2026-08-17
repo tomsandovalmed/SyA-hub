@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronLeft, ShieldCheck, UserCheck, Lock, Plus, Edit3, Trash2, X } from 'lucide-react';
 import type { User } from '../types';
-import type { ViewMode } from '../modules/perfmon-analyzer/types/perfmon.types';
+import type { ViewMode } from '../modules/analizador-rendimiento/types/tiposAnalizador';
 import { usersStore } from '../config/auth';
 
 interface AdminDashboardViewProps {

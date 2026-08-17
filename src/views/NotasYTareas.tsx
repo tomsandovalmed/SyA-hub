@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ViewMode } from '../modules/perfmon-analyzer/types/perfmon.types';
+import { ViewMode } from '../modules/analizador-rendimiento/types/tiposAnalizador';
 import { CheckSquare, Plus, Trash2, ChevronRight, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 
 export type EstadoTarea = 'Pendiente' | 'En Proceso' | 'Listo';
