@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ModoVista,
   TipoModulo,
   DatosContadorPerfmon,
   ViolacionUmbral,
@@ -16,7 +15,6 @@ import {
   Settings,
   RefreshCw,
   CheckCircle2,
-  ChevronRight,
   Play,
   FileSpreadsheet,
   AlertCircle,
@@ -25,7 +23,6 @@ import {
 
 interface VistaAnalizadorRendimientoProps {
   selectedModule: TipoModulo;
-  onChangeModule: (module: TipoModulo) => void;
   counters: DatosContadorPerfmon[];
   alerts: ViolacionUmbral[];
   thresholdConfig: ConfiguracionUmbrales;
@@ -35,7 +32,6 @@ interface VistaAnalizadorRendimientoProps {
     parsedAlerts: ViolacionUmbral[],
     filename: string
   ) => void;
-  onNavigate?: (view: ModoVista) => void;
 }
 
 export const VistaAnalizadorRendimiento: React.FC<VistaAnalizadorRendimientoProps> = ({
@@ -45,7 +41,6 @@ export const VistaAnalizadorRendimiento: React.FC<VistaAnalizadorRendimientoProp
   thresholdConfig,
   onUpdateThresholds,
   onAnalyzeFile,
-  onNavigate,
 }) => {
   const {
     selectedFiles,
@@ -102,28 +97,8 @@ export const VistaAnalizadorRendimiento: React.FC<VistaAnalizadorRendimientoProp
         <div className="text-sm text-gray-500">Repositorio: {uploadedFiles.length} archivo(s)</div>
       </div>
 
-      <div className="flex items-center gap-2 text-xs text-gray-500 font-mono uppercase tracking-wider">
-        <button
-          type="button"
-          onClick={() => onNavigate?.('hub')}
-          className="hover:text-[#002395] hover:underline cursor-pointer"
-        >
-          Análisis SQL
-        </button>
-        <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
-        <button
-          type="button"
-          onClick={() => onNavigate?.('module-select')}
-          className="hover:text-[#002395] hover:underline cursor-pointer"
-        >
-          Selección Módulo
-        </button>
-        <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
-        <span className="text-[#002395] font-bold">Perfmon {selectedModule}</span>
-      </div>
-
       <div>
-        <h1 className="text-3xl font-bold text-[#002395] tracking-tight">Perfmon SQL {selectedModule}</h1>
+        <h1 className="text-3xl font-bold text-[#002395] tracking-tight">Visor Perfmon</h1>
         <p className="text-gray-500 mt-2 text-sm md:text-base">
           Cargue un archivo de registros .csv o .blg para generar los gráficos de diagnóstico técnico.
         </p>
@@ -226,7 +201,7 @@ export const VistaAnalizadorRendimiento: React.FC<VistaAnalizadorRendimientoProp
             <p className="text-sm text-gray-500 mt-1">
               Seleccione y procese un archivo{' '}
               <code className="text-[#002395] font-mono font-semibold">.csv</code> para renderizar los
-              gráficos de contadores del Módulo {selectedModule}.
+              gráficos de contadores.
             </p>
           </div>
         </div>
