@@ -5,6 +5,7 @@ import { defineConfig, PluginOption } from 'vite';
 import obfuscator from 'vite-plugin-javascript-obfuscator';
 
 export default defineConfig({
+  base: '/SyA-hub/', // <-- Agregado para arreglar las rutas en GitHub Pages
   plugins: [
     react(),
     tailwindcss(),
