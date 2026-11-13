@@ -1,9 +1,6 @@
 import type { AuthCredentials, AuthResponse, ReportItem, User } from '../types';
 import { demoReports, usersStore } from '../config/auth';
 
-export const isClientRole = (role: User['role']) => role === 'CLIENT';
-export const canAccessHub = (user?: User | null) => Boolean(user && !isClientRole(user.role));
-
 export const authenticateUser = async (credentials: AuthCredentials): Promise<AuthResponse> => {
   try {
     const response = await fetch('/api/v1/auth/login', {

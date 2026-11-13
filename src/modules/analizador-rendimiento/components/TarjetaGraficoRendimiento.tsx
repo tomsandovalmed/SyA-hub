@@ -87,7 +87,7 @@ export const TarjetaGraficoRendimiento = memo<PerfmonChartCardProps>(function Ta
         ctx.restore();
       },
     }),
-    [counterData.serverName, counterData.counterName]
+    [counterData.nombreServidor, counterData.nombreContador]
   );
 
   // Plugin para pintar las franjas de advertencia y peligro
@@ -113,7 +113,7 @@ export const TarjetaGraficoRendimiento = memo<PerfmonChartCardProps>(function Ta
         ctx.restore();
       },
     }),
-    [counterData.limit]
+    [counterData.limite]
   );
 
   const handleNavigateToChart = useCallback(
@@ -145,7 +145,7 @@ export const TarjetaGraficoRendimiento = memo<PerfmonChartCardProps>(function Ta
     link.href = chartRef.current.toBase64Image('image/png', 1.0);
     link.click();
     showToast('Descargando gráfico oficial con leyenda y servidor...');
-  }, [counterData.name, showToast]);
+  }, [counterData.nombre, showToast]);
 
   // Estructura de datos explícitamente tipada como ChartData<'line'>
   const chartData = useMemo<ChartData<'line'>>(

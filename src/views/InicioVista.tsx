@@ -1,10 +1,10 @@
 import React from 'react';
-import { ModuleType } from '../modules/analizador-rendimiento/types/tiposAnalizador';
+import type { TipoModulo } from '../modules/analizador-rendimiento/types/tiposAnalizador';
 import { Rocket, BarChart3, Play, Database } from 'lucide-react';
 
 interface InicioVistaProps {
   onSelectTool: () => void;
-  onOpenModule: (module: ModuleType) => void;
+  onOpenModule: (module: TipoModulo) => void;
 }
 
 // AQUÍ FORZAMOS LA EXPORTACIÓN NOMBRADA: "export const InicioVista"

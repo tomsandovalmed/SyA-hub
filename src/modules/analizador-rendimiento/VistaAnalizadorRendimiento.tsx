@@ -25,7 +25,6 @@ import {
 
 interface VistaAnalizadorRendimientoProps {
   selectedModule: TipoModulo;
-  onChangeModule: (module: TipoModulo) => void;
   counters: DatosContadorPerfmon[];
   alerts: ViolacionUmbral[];
   thresholdConfig: ConfiguracionUmbrales;

@@ -33,9 +33,6 @@ let users: User[] = [...initialUsers];
 
 export const usersStore = {
   getUsers: () => users.slice(),
-  setUsers: (next: User[]) => {
-    users = next.slice();
-  },
   addUser: (u: User) => {
     users = [u, ...users];
   },

@@ -49,7 +49,7 @@ async function startServer() {
         processedAt: new Date().toISOString(),
         totalRecords: 14280,
         module: mod,
-        criticalAlertsCount: alerts.filter(a => a.severity === 'CRITICAL').length,
+        criticalAlertsCount: alerts.filter(a => a.severidad === 'CRITICAL').length,
         countersCount: counters.length
       },
       counters,

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ModuleType, ViewMode } from '../types/tiposAnalizador';
+import type { TipoModulo, ModoVista } from '../types/tiposAnalizador';
 import { Landmark, Receipt, ArrowRight, Info, ChevronRight, BookOpen, X } from 'lucide-react';
 
 interface ModuleSelectionViewProps {
-  onSelectModule: (module: ModuleType) => void;
-  onNavigate?: (view: ViewMode) => void;
+  onSelectModule: (module: TipoModulo) => void;
+  onNavigate?: (view: ModoVista) => void;
 }
 
 export const SeleccionModulo: React.FC<ModuleSelectionViewProps> = ({ onSelectModule, onNavigate }) => {

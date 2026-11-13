@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ViewMode } from '../modules/analizador-rendimiento/types/tiposAnalizador';
+import type { ModoVista } from '../modules/analizador-rendimiento/types/tiposAnalizador';
 import { CheckSquare, Plus, Trash2, ChevronRight, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 
 export type EstadoTarea = 'Pendiente' | 'En Proceso' | 'Listo';
@@ -13,7 +13,7 @@ export interface TareaItem {
 }
 
 interface NotasYTareasProps {
-  onNavigate?: (view: ViewMode) => void;
+  onNavigate?: (view: ModoVista) => void;
 }
 
 export const NotasYTareas: React.FC<NotasYTareasProps> = ({ onNavigate }) => {

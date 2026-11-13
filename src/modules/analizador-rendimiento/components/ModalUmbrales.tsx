@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ThresholdConfig } from '../types/tiposAnalizador';
+import type { ConfiguracionUmbrales } from '../types/tiposAnalizador';
 import { X, Settings, Sliders, CheckCircle2 } from 'lucide-react';
 
 interface ThresholdsModalProps {
   isOpen: boolean;
-  config: ThresholdConfig;
+  config: ConfiguracionUmbrales;
   onClose: () => void;
-  onSave: (newConfig: ThresholdConfig) => void;
+  onSave: (newConfig: ConfiguracionUmbrales) => void;
 }
 
 export const ModalUmbrales: React.FC<ThresholdsModalProps> = ({
@@ -15,7 +15,7 @@ export const ModalUmbrales: React.FC<ThresholdsModalProps> = ({
   onClose,
   onSave,
 }) => {
-  const [formData, setFormData] = useState<ThresholdConfig>(config);
+  const [formData, setFormData] = useState<ConfiguracionUmbrales>(config);
 
   useEffect(() => {
     if (config) setFormData(config);
@@ -63,8 +63,8 @@ export const ModalUmbrales: React.FC<ThresholdsModalProps> = ({
                 <span className="text-gray-400 block mb-2">Ideal: &lt; 20</span>
                 <input
                   type="number"
-                  value={formData.memoryPagesSecLimit ?? 20}
-                  onChange={(e) => setFormData({ ...formData, memoryPagesSecLimit: Number(e.target.value) })}
+                  value={formData.limitePaginasMemoriaPorSeg ?? 20}
+                  onChange={(e) => setFormData({ ...formData, limitePaginasMemoriaPorSeg: Number(e.target.value) })}
                   className="w-full bg-white border border-gray-300 rounded-lg p-1.5 font-mono"
                 />
               </div>
@@ -74,8 +74,8 @@ export const ModalUmbrales: React.FC<ThresholdsModalProps> = ({
                 <span className="text-gray-400 block mb-2">Alerta: &gt;= 50%</span>
                 <input
                   type="number"
-                  value={formData.cpuWarning ?? 50}
-                  onChange={(e) => setFormData({ ...formData, cpuWarning: Number(e.target.value) })}
+                  value={formData.avisoCpu ?? 50}
+                  onChange={(e) => setFormData({ ...formData, avisoCpu: Number(e.target.value) })}
                   className="w-full bg-white border border-gray-300 rounded-lg p-1.5 font-mono"
                 />
               </div>
@@ -85,8 +85,8 @@ export const ModalUmbrales: React.FC<ThresholdsModalProps> = ({
                 <span className="text-gray-400 block mb-2">Ideal: &lt; 80%</span>
                 <input
                   type="number"
-                  value={formData.cpuCritical ?? 80}
-                  onChange={(e) => setFormData({ ...formData, cpuCritical: Number(e.target.value) })}
+                  value={formData.criticoCpu ?? 80}
+                  onChange={(e) => setFormData({ ...formData, criticoCpu: Number(e.target.value) })}
                   className="w-full bg-white border border-gray-300 rounded-lg p-1.5 font-mono"
                 />
               </div>
@@ -96,8 +96,8 @@ export const ModalUmbrales: React.FC<ThresholdsModalProps> = ({
                 <span className="text-gray-400 block mb-2">Alerta: &lt;= 95%</span>
                 <input
                   type="number"
-                  value={formData.bufferWarning ?? 95}
-                  onChange={(e) => setFormData({ ...formData, bufferWarning: Number(e.target.value) })}
+                  value={formData.avisoBuffer ?? 95}
+                  onChange={(e) => setFormData({ ...formData, avisoBuffer: Number(e.target.value) })}
                   className="w-full bg-white border border-gray-300 rounded-lg p-1.5 font-mono"
                 />
               </div>
@@ -107,8 +107,8 @@ export const ModalUmbrales: React.FC<ThresholdsModalProps> = ({
                 <span className="text-gray-400 block mb-2">Ideal: &gt; 80%</span>
                 <input
                   type="number"
-                  value={formData.bufferCritical ?? 80}
-                  onChange={(e) => setFormData({ ...formData, bufferCritical: Number(e.target.value) })}
+                  value={formData.criticoBuffer ?? 80}
+                  onChange={(e) => setFormData({ ...formData, criticoBuffer: Number(e.target.value) })}
                   className="w-full bg-white border border-gray-300 rounded-lg p-1.5 font-mono"
                 />
               </div>
@@ -118,8 +118,8 @@ export const ModalUmbrales: React.FC<ThresholdsModalProps> = ({
                 <span className="text-gray-400 block mb-2">Ideal: &gt; 95%</span>
                 <input
                   type="number"
-                  value={formData.cacheHitRatioOLTP ?? 95}
-                  onChange={(e) => setFormData({ ...formData, cacheHitRatioOLTP: Number(e.target.value) })}
+                  value={formData.proporcionAciertoCacheOLTP ?? 95}
+                  onChange={(e) => setFormData({ ...formData, proporcionAciertoCacheOLTP: Number(e.target.value) })}
                   className="w-full bg-white border border-gray-300 rounded-lg p-1.5 font-mono"
                 />
               </div>
@@ -129,8 +129,8 @@ export const ModalUmbrales: React.FC<ThresholdsModalProps> = ({
                 <span className="text-gray-400 block mb-2">Ideal: &gt; 80%</span>
                 <input
                   type="number"
-                  value={formData.cacheHitRatioOLAP ?? 80}
-                  onChange={(e) => setFormData({ ...formData, cacheHitRatioOLAP: Number(e.target.value) })}
+                  value={formData.proporcionAciertoCacheOLAP ?? 80}
+                  onChange={(e) => setFormData({ ...formData, proporcionAciertoCacheOLAP: Number(e.target.value) })}
                   className="w-full bg-white border border-gray-300 rounded-lg p-1.5 font-mono"
                 />
               </div>
@@ -140,8 +140,8 @@ export const ModalUmbrales: React.FC<ThresholdsModalProps> = ({
                 <span className="text-gray-400 block mb-2">Ideal: &lt;= 100</span>
                 <input
                   type="number"
-                  value={formData.sqlCompilationsSecLimit ?? 100}
-                  onChange={(e) => setFormData({ ...formData, sqlCompilationsSecLimit: Number(e.target.value) })}
+                  value={formData.limiteCompilacionesSqlPorSeg ?? 100}
+                  onChange={(e) => setFormData({ ...formData, limiteCompilacionesSqlPorSeg: Number(e.target.value) })}
                   className="w-full bg-white border border-gray-300 rounded-lg p-1.5 font-mono"
                 />
               </div>
@@ -151,8 +151,8 @@ export const ModalUmbrales: React.FC<ThresholdsModalProps> = ({
                 <span className="text-gray-400 block mb-2">Ideal: &lt; 1000</span>
                 <input
                   type="number"
-                  value={formData.locksSecLimit ?? 1000}
-                  onChange={(e) => setFormData({ ...formData, locksSecLimit: Number(e.target.value) })}
+                  value={formData.limiteBloqueosPorSeg ?? 1000}
+                  onChange={(e) => setFormData({ ...formData, limiteBloqueosPorSeg: Number(e.target.value) })}
                   className="w-full bg-white border border-gray-300 rounded-lg p-1.5 font-mono"
                 />
               </div>

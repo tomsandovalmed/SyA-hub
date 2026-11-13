@@ -1,10 +1,10 @@
 import React from 'react';
-import { ViewMode, OperationHistoryItem } from '../modules/analizador-rendimiento/types/tiposAnalizador';
+import type { ModoVista, ItemHistorialOperacion } from '../modules/analizador-rendimiento/types/tiposAnalizador';
 import { Clock, CheckCircle2, AlertCircle, ChevronRight } from 'lucide-react';
 
 interface HistorialVistaProps {
-  history: OperationHistoryItem[];
-  onNavigate?: (view: ViewMode) => void;
+  history: ItemHistorialOperacion[];
+  onNavigate?: (view: ModoVista) => void;
 }
 
 export const HistorialVista: React.FC<HistorialVistaProps> = ({ history, onNavigate }) => {

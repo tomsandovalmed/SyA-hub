@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { PerfmonCounterData, ThresholdViolation, ModuleType } from '../types/tiposAnalizador';
+import type { DatosContadorPerfmon, ViolacionUmbral, TipoModulo } from '../types/tiposAnalizador';
 import { FileText, Download, Check, X, FileSpreadsheet, Code2 } from 'lucide-react';
 
 interface ReportExportModalProps {
   isOpen: boolean;
-  selectedModule: ModuleType;
+  selectedModule: TipoModulo;
   selectedFileName: string;
-  counters: PerfmonCounterData[];
-  alerts: ThresholdViolation[];
+  counters: DatosContadorPerfmon[];
+  alerts: ViolacionUmbral[];
   onClose: () => void;
 }
 
@@ -32,13 +32,13 @@ export const ModalExportarReporte: React.FC<ReportExportModalProps> = ({
     csvContent += `CONTADORES Y PROMEDIOS\n`;
     csvContent += `Contador,Instancia,Min,Avg,Max,Estado\n`;
     counters.forEach(c => {
-      csvContent += `"${c.counterName}","${c.instance}",${c.min},${c.avg},${c.max},"${c.condition}"\n`;
+      csvContent += `"${c.nombreContador}","${c.instancia}",${c.minimo},${c.promedio},${c.maximo},"${c.condicion}"\n`;
     });
 
     csvContent += `\nALERTAS Y VIOLACIONES DE UMBRAL\n`;
     csvContent += `Rango Tiempo,Condicion,Contador,Valor Promedio,Limite\n`;
     alerts.forEach(a => {
-      csvContent += `"${a.timeRange}","${a.condition}","${a.counter}",${a.avgValue},${a.limit}\n`;
+      csvContent += `"${a.rangoTemporal}","${a.condicion}","${a.contador}",${a.valorPromedio},${a.limite}\n`;
     });
 
     const encodedUri = encodeURI(csvContent);

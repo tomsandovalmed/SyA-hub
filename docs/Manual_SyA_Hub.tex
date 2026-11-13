@@ -1,0 +1,579 @@
+% ============================================================================
+%  Manual de uso - S&A Tool Hub (SyA-hub)
+%  Compilar con:  pdflatex Manual_SyA_Hub.tex   (ejecutar dos veces para el índice)
+% ============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+
+% ---------------------------------------------------------------- Colores ---
+\definecolor{sablue}{HTML}{002395}
+\definecolor{sanavy}{HTML}{001360}
+\definecolor{salight}{HTML}{EEF3FF}
+\definecolor{codebg}{HTML}{F6F8FA}
+\definecolor{warnbg}{HTML}{FFF7E6}
+\definecolor{warnfr}{HTML}{D97706}
+
+\titleformat{\section}{\Large\bfseries\color{sanavy}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\large\bfseries\color{sablue}}{\thesubsection}{0.7em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{sablue}\textbf{S\&A Tool Hub}}
+\fancyhead[R]{\small Manual de uso}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single, rulecolor=\color{gray!40},
+  breaklines=true, columns=fullflexible,
+  keepspaces=true, showstringspaces=false,
+  xleftmargin=4pt, xrightmargin=4pt,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1
+}
+
+\newtcolorbox{nota}[1][Nota]{colback=salight,colframe=sablue,fonttitle=\bfseries,title=#1,arc=2mm}
+\newtcolorbox{aviso}[1][Advertencia]{colback=warnbg,colframe=warnfr,fonttitle=\bfseries,title=#1,arc=2mm}
+
+\newcommand{\ruta}[1]{\texttt{#1}}
+
+% ============================================================================
+\begin{document}
+
+% ---------------------------------------------------------------- Portada ---
+\begin{titlepage}
+  \centering
+  \vspace*{3cm}
+  {\fontsize{40}{48}\selectfont\bfseries\color{sablue} S\&A}\\[2pt]
+  {\large\bfseries\color{sablue} CHILE}\\[1.5cm]
+  {\Huge\bfseries\color{sanavy} S\&A Tool Hub}\\[0.4cm]
+  {\Large Centro de Herramientas de Análisis}\\[1.8cm]
+  {\large Manual de instalación, uso y características}\\[0.3cm]
+  {\large Control de acceso por roles (RBAC) y credenciales}\\
+  \vfill
+  {\small Versión del documento: 1.0 \quad---\quad Noviembre 2026}
+\end{titlepage}
+
+% ------------------------------------------------- Aviso de personalización ---
+\begin{tcolorbox}[colback=salight,colframe=sablue,fonttitle=\bfseries\large,
+  title={Este software es completamente modificable},arc=2mm]
+S\&A Tool Hub se entrega como \textbf{código fuente abierto para el equipo}: puede
+modificarse, ampliarse o recortarse \textbf{a gusto}. Textos, colores, logotipos,
+módulos, umbrales, usuarios, roles, endpoints de la API y el propio flujo de navegación
+están en archivos TypeScript/React legibles y documentados en este manual.
+
+Nada de lo descrito aquí es una restricción: es la configuración \emph{actual} del
+proyecto, pensada como punto de partida. Las secciones~\ref{sec:estructura},
+\ref{sec:rbac} y~\ref{sec:credenciales} indican exactamente qué archivo tocar para
+cada cambio habitual.
+\end{tcolorbox}
+
+\vspace{0.6cm}
+\tableofcontents
+\newpage
+
+% ============================================================================
+\section{Descripción general}
+
+S\&A Tool Hub es una aplicación web (SPA en React servida por Express) que reúne
+herramientas internas de análisis y un portal de informes para clientes. Actualmente
+ofrece:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Intérprete Perfmon SQL}: carga logs de Perfmon de SQL Server en formato
+        CSV, genera gráficos interactivos por contador y detecta violaciones de umbral.
+        Dispone de dos módulos de contexto: \textbf{SII} y \textbf{TGR}.
+  \item \textbf{Exportación de reportes} del análisis en CSV y JSON, y descarga de cada
+        gráfico como imagen PNG.
+  \item \textbf{Repositorio local} de archivos analizados (en el \texttt{localStorage}
+        del navegador): seleccionar, renombrar y eliminar análisis previos.
+  \item \textbf{Historial de acciones} con las operaciones realizadas en la sesión.
+  \item \textbf{Notas y tareas} con estados \emph{Pendiente}, \emph{En Proceso} y \emph{Listo}.
+  \item \textbf{Portal de clientes}: cada cliente ve únicamente los informes de su entidad,
+        con búsqueda, filtro por tipo y descarga.
+  \item \textbf{Panel de administración}: alta, edición, cambio de rol y baja de usuarios.
+\end{itemize}
+
+\subsection{Tecnologías}
+
+\begin{center}
+\rowcolors{2}{salight}{white}
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Componente} & \textbf{Tecnología} \\
+\midrule
+Frontend        & React 19, TypeScript, Tailwind CSS 4, iconos \texttt{lucide-react} \\
+Gráficos        & Chart.js 4 + \texttt{react-chartjs-2} \\
+Servidor / API  & Node.js + Express 4 (archivo \ruta{server.ts}) \\
+Empaquetado     & Vite 6 (frontend) y esbuild (servidor) \\
+Protección      & \texttt{vite-plugin-javascript-obfuscator}: ofusca el JavaScript del build \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{nota}
+Las versiones indicadas son las declaradas en \ruta{package.json} al momento de
+redactar este manual. Pueden cambiar si se actualizan las dependencias; verifique
+siempre ese archivo como fuente de verdad.
+\end{nota}
+
+% ============================================================================
+\section{Instalación y puesta en marcha}
+
+\subsection{Requisitos previos}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Node.js} 20 o superior (el proyecto se probó con Node.js 26) y \textbf{npm}.
+        Descarga oficial: \url{https://nodejs.org}.
+  \item \textbf{Git} para clonar el repositorio.
+  \item Un navegador moderno (Chrome, Edge o Firefox).
+\end{itemize}
+
+\subsection{Obtener el código}
+\begin{lstlisting}[language=bash]
+git clone https://github.com/tomsandovalmed/SyA-hub.git
+cd SyA-hub
+\end{lstlisting}
+
+\subsection{Instalar dependencias}
+\begin{lstlisting}[language=bash]
+npm install
+\end{lstlisting}
+
+Dependencias de ejecución (\texttt{dependencies}):
+\begin{center}
+\rowcolors{2}{salight}{white}
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Paquete} & \textbf{Uso} \\
+\midrule
+\texttt{express}               & Servidor HTTP y API REST \\
+\texttt{vite}                  & Servidor de desarrollo (middleware) y compilación \\
+\texttt{@vitejs/plugin-react}  & Soporte de React/JSX en Vite \\
+\texttt{@tailwindcss/vite}     & Integración de Tailwind CSS \\
+\texttt{react}, \texttt{react-dom} & Librería de interfaz \\
+\texttt{chart.js}, \texttt{react-chartjs-2} & Gráficos de líneas de los contadores \\
+\texttt{lucide-react}          & Iconografía \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Dependencias de desarrollo (\texttt{devDependencies}): \texttt{typescript}, \texttt{tsx}
+(ejecuta \ruta{server.ts} sin compilar), \texttt{esbuild}, \texttt{tailwindcss},
+\texttt{vite-plugin-javascript-obfuscator} y los tipos \texttt{@types/*}.
+
+\subsection{Scripts disponibles}
+\begin{center}
+\rowcolors{2}{salight}{white}
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Comando} & \textbf{Qué hace} \\
+\midrule
+\texttt{npm run dev}   & Inicia el servidor en modo desarrollo con recarga en caliente \\
+\texttt{npm run lint}  & Verifica tipos con \texttt{tsc --noEmit} \\
+\texttt{npm run build} & Compila y ofusca el frontend y empaqueta el servidor en \ruta{dist/} \\
+\texttt{npm run start} & Ejecuta la versión compilada (\ruta{dist/server.js}) \\
+\texttt{npm run clean} & Elimina la carpeta \ruta{dist/} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Modo desarrollo}
+\begin{lstlisting}[language=bash]
+npm run dev
+\end{lstlisting}
+Abra \url{http://localhost:3000}. El puerto está fijado en la constante
+\texttt{PORT} de \ruta{server.ts}; cámbielo allí si lo necesita.
+
+\subsection{Modo producción}
+\begin{lstlisting}[language=bash]
+npm run build
+npm run start
+\end{lstlisting}
+
+\begin{aviso}
+El servidor decide el modo así: si \texttt{NODE\_ENV=production} \textbf{o si existe la
+carpeta \ruta{dist/}}, sirve la versión compilada. Por eso, después de un
+\texttt{npm run build}, el comando \texttt{npm run dev} seguirá mostrando la versión
+compilada. Ejecute \texttt{npm run clean} para volver al modo desarrollo.
+\end{aviso}
+
+\subsection{Exposición pública temporal (opcional)}
+Para mostrar la aplicación fuera de la red local puede usarse un túnel:
+\begin{lstlisting}[language=bash]
+cloudflared tunnel --url http://localhost:3000
+npx localtunnel --port 3000
+\end{lstlisting}
+Recuerde que las credenciales actuales son de demostración (sección~\ref{sec:credenciales}):
+no exponga la aplicación públicamente sin cambiarlas.
+
+% ============================================================================
+\section{Guía de uso}
+
+\subsection{Inicio de sesión}
+Al abrir la aplicación se muestra la pantalla \emph{Iniciar Sesión}. Tras autenticarse,
+el usuario es dirigido según su rol (ver sección~\ref{sec:rbac}). La sesión vive en
+memoria del navegador: al recargar la página se vuelve a pedir el inicio de sesión.
+
+\subsection{Centro de Herramientas (Hub)}
+Pantalla principal para \texttt{ADMIN} y \texttt{WORKER}. La barra superior da acceso a
+\emph{Herramientas}, \emph{Historial}, \emph{Tareas} y, solo para administradores,
+\emph{Admin}. El menú de perfil (esquina superior derecha) muestra nombre, correo, rol
+y el botón \emph{Cerrar sesión}.
+
+\subsection{Intérprete Perfmon SQL}
+\begin{enumerate}[leftmargin=*]
+  \item En el Hub pulse \textbf{Utilizar Herramienta} y elija \textbf{Módulo SII} o
+        \textbf{Módulo TGR}.
+  \item Pulse \textbf{Cargar archivo(s) o carpeta} y seleccione uno o varios CSV de Perfmon.
+  \item Pulse \textbf{Procesar archivo(s)}. Si se cargan varios archivos, los contadores
+        con el mismo identificador se combinan en una sola serie.
+  \item Navegue entre contadores con las pestañas; cada uno muestra un gráfico, una tabla
+        con mínimo, promedio, máximo y desviación estándar, y la lista de alertas.
+        \emph{Ver en gráfico} resalta el punto exacto de la alerta.
+  \item Use el selector \textbf{Servidor} para filtrar si el log contiene varios equipos.
+\end{enumerate}
+
+\paragraph{Contadores reconocidos.} El analizador busca en los encabezados del CSV estas
+cadenas (archivo \ruta{src/modules/analizador-rendimiento/utils/procesadorCsv.ts},
+constante \texttt{TARGET\_METRICS}):
+\texttt{Memory\textbackslash Available MBytes}, \texttt{\% Processor Time},
+\texttt{Full Scans/sec}, \texttt{Buffer cache hit ratio}, \texttt{Transactions/sec} y
+\texttt{User Connections}. Para agregar más contadores, añada entradas a esa lista.
+
+\begin{aviso}[Archivos .blg]
+El selector acepta \texttt{.blg}, pero el analizador lee el archivo como texto CSV.
+Los \texttt{.blg} son binarios, por lo que deben convertirse a CSV antes de cargarlos.
+En Windows suele hacerse con la herramienta \texttt{relog}
+(\texttt{relog archivo.blg -f csv -o archivo.csv}); verifique la sintaxis en la
+documentación de Microsoft de su versión de Windows.
+\end{aviso}
+
+\subsection{Umbrales y alertas}
+El botón \textbf{Configuración} abre los umbrales de análisis. Al guardar, los
+contadores ya cargados se reevalúan inmediatamente. Valores por defecto (definidos en
+\texttt{initialThresholds}, archivo \ruta{src/modules/analizador-rendimiento/data/datosSimulados.ts}):
+
+\begin{center}
+\rowcolors{2}{salight}{white}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Métrica} & \textbf{Aviso} & \textbf{Crítico} \\
+\midrule
+\% Processor Time            & $\geq 50\%$ & $\geq 80\%$ \\
+Buffer cache hit ratio       & $\leq 95\%$ & $\leq 80\%$ \\
+Memory Pages/sec (límite)    & \multicolumn{2}{c}{20} \\
+Cache Hit Ratio OLTP / OLAP  & \multicolumn{2}{c}{95\% / 80\%} \\
+SQL Compilations/sec (límite)& \multicolumn{2}{c}{100} \\
+Lock Requests/sec (límite)   & \multicolumn{2}{c}{1000} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{nota}
+En la versión actual, el detector de alertas
+(\ruta{utils/detectorUmbrales.ts}) solo genera alertas para \textbf{CPU} y
+\textbf{Buffer cache hit ratio}. Los demás umbrales se guardan y se envían a la API,
+pero aún no disparan alertas: son el punto de extensión natural para nuevas reglas.
+\end{nota}
+
+\subsection{Reportes y exportación}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Generar Reporte Completo}: descarga un CSV (para Excel) o un JSON (para
+        integración con otros sistemas) con contadores, estadísticas y alertas.
+  \item \textbf{Descargar gráfico}: exporta el gráfico activo como PNG, con el nombre
+        del servidor y del contador en la cabecera.
+  \item \textbf{Más acciones}: copia al portapapeles la condición o las estadísticas.
+\end{itemize}
+
+\subsection{Repositorio de archivos cargados}
+Cada procesamiento queda guardado en el \texttt{localStorage} del navegador. Si el
+análisis es demasiado grande para el almacenamiento local, solo se conservan los
+metadatos y será necesario volver a procesar el archivo para ver sus datos.
+
+\subsection{Historial y Notas/Tareas}
+El \emph{Historial} registra cada análisis realizado. \emph{Tareas} permite crear notas
+con título, descripción y estado. Ambos se mantienen en memoria y se reinician al
+recargar la página.
+
+\subsection{Portal de clientes}
+Los usuarios con rol \texttt{CLIENT} ven exclusivamente el \emph{Centro de informes
+corporativo} con los informes cuyo \texttt{clientId} coincide con el suyo. Pueden buscar
+por texto, filtrar por tipo y descargar cada informe.
+
+\subsection{Panel de administración}
+Disponible solo para \texttt{ADMIN}. Permite crear usuarios (nombre, correo, rol,
+\texttt{clientId} opcional y contraseña opcional), editarlos, cambiar el rol directamente
+desde la tabla y eliminarlos (con confirmación).
+
+\begin{aviso}
+Los cambios del panel de administración se guardan \textbf{solo en la memoria del
+navegador} y se pierden al recargar la página. Además, no llegan al servidor: un usuario
+creado desde el panel inicia sesión gracias a la validación local de respaldo del
+frontend (ver sección~\ref{sec:seguridad}).
+\end{aviso}
+
+% ============================================================================
+\section{Control de acceso por roles (RBAC)}\label{sec:rbac}
+
+El sistema define tres roles en el tipo \texttt{Role} de \ruta{src/types.ts}:
+
+\begin{lstlisting}
+export type Role = 'ADMIN' | 'WORKER' | 'CLIENT';
+\end{lstlisting}
+
+\subsection{Matriz de permisos}
+\begin{center}
+\rowcolors{2}{salight}{white}
+\begin{tabularx}{\linewidth}{Xccc}
+\toprule
+\textbf{Funcionalidad} & \textbf{ADMIN} & \textbf{WORKER} & \textbf{CLIENT} \\
+\midrule
+Pantalla inicial tras el login      & Panel Admin & Hub & Portal cliente \\
+Centro de Herramientas (Hub)        & Sí & Sí & No \\
+Intérprete Perfmon SII / TGR        & Sí & Sí & No \\
+Configurar umbrales y exportar      & Sí & Sí & No \\
+Historial de acciones               & Sí & Sí & No \\
+Notas y tareas                      & Sí & Sí & No \\
+Panel de administración de usuarios & Sí & No & No \\
+Portal de informes del cliente      & No & No & Sí (solo su \texttt{clientId}) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Dónde se aplica}
+\begin{itemize}[leftmargin=*]
+  \item \ruta{src/App.tsx}: tras el login, \texttt{handleLoginSuccess} envía a cada rol a su
+        pantalla inicial. Si el rol es \texttt{CLIENT} se renderiza únicamente
+        \texttt{ClientReportsView}; el resto de la aplicación no se monta. La vista
+        \texttt{admin} solo se renderiza si \texttt{authUser.role === "ADMIN"}.
+  \item \ruta{src/components/ui/TopNavBar.tsx}: el botón \emph{Admin} solo se muestra
+        al rol \texttt{ADMIN}.
+  \item \ruta{src/core/auth.ts} y \ruta{server.ts}: \texttt{getClientReports} y el endpoint
+        \texttt{GET /api/v1/reports?clientId=...} filtran los informes por \texttt{clientId}.
+\end{itemize}
+
+\subsection{Cómo modificar los roles}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Agregar un rol} (por ejemplo \texttt{AUDITOR}): añádalo al tipo
+        \texttt{Role} en \ruta{src/types.ts}.
+  \item Defina su pantalla inicial en \texttt{handleLoginSuccess} de \ruta{src/App.tsx} y
+        las condiciones de renderizado de las vistas que podrá ver.
+  \item Muestre u oculte los botones de navegación en \ruta{TopNavBar.tsx}.
+  \item Agregue la opción en los \texttt{<select>} de rol de
+        \ruta{src/views/AdminDashboardView.tsx}.
+  \item Ejecute \texttt{npm run lint}: TypeScript señalará los lugares que falten.
+\end{enumerate}
+
+% ============================================================================
+\section{Credenciales actuales}\label{sec:credenciales}
+
+\subsection{Cuentas de demostración}
+\begin{center}
+\rowcolors{2}{salight}{white}
+\begin{tabular}{llll}
+\toprule
+\textbf{Rol} & \textbf{Correo} & \textbf{Contraseña} & \textbf{clientId} \\
+\midrule
+ADMIN  & \texttt{admin@sachile.cl}       & \texttt{admin123}  & --- \\
+WORKER & \texttt{worker@sachile.cl}      & \texttt{worker123} & --- \\
+CLIENT & \texttt{cliente.sii@sachile.cl} & \texttt{client123} & \texttt{SII} \\
+CLIENT & \texttt{cliente.tgr@sachile.cl} & \texttt{client123} & \texttt{TGR} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Dónde están alojadas}
+Todas las credenciales viven en el \textbf{código fuente}; no hay base de datos ni archivo
+\texttt{.env} involucrado.
+
+\begin{center}
+\rowcolors{2}{salight}{white}
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Archivo} & \textbf{Contenido} \\
+\midrule
+\ruta{src/config/auth.ts} &
+  Arreglo \texttt{initialUsers}: id, correo, nombre, rol y \texttt{clientId} de cada
+  usuario. También \texttt{demoReports}, los informes visibles en el portal de clientes. \\
+\ruta{server.ts} (endpoint \texttt{/api/v1/auth/login}) &
+  Regla de contraseña del servidor. \\
+\ruta{src/core/auth.ts} (\texttt{authenticateUser}) &
+  La misma regla, usada como respaldo en el navegador. \\
+\ruta{src/views/LoginView.tsx} (\texttt{passwordHint}) &
+  Texto de ayuda que muestra la contraseña esperada según el correo escrito. \\
+\ruta{src/views/AdminDashboardView.tsx} (\texttt{getCredentialHint}) &
+  Columna \emph{Credencial demo} de la tabla de usuarios. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\paragraph{Regla de contraseña.} Los usuarios iniciales no tienen contraseña propia; se
+usa una contraseña derivada del rol:
+\begin{lstlisting}
+const expected = user.password ?? `${user.role.toLowerCase()}123`;
+\end{lstlisting}
+Es decir, \texttt{admin123}, \texttt{worker123} o \texttt{client123}. Si un usuario tiene
+el campo \texttt{password}, se usa ese valor.
+
+\subsection{Cómo cambiarlas}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Cambiar correos, nombres o agregar usuarios}: edite \texttt{initialUsers}
+        en \ruta{src/config/auth.ts}.
+  \item \textbf{Asignar una contraseña propia}: agregue el campo \texttt{password} al
+        usuario, por ejemplo:
+\begin{lstlisting}
+{
+  id: 'admin-1',
+  email: 'admin@sachile.cl',
+  name: 'Administrador S&A',
+  role: 'ADMIN',
+  password: 'NuevaClaveSegura!2026',
+},
+\end{lstlisting}
+  \item \textbf{Cambiar la regla por rol}: modifique la línea \texttt{expected} en
+        \ruta{server.ts} \emph{y} en \ruta{src/core/auth.ts} (deben coincidir).
+  \item \textbf{Quitar las pistas de contraseña}: elimine o reemplace
+        \texttt{passwordHint} en \ruta{LoginView.tsx} y la columna \emph{Credencial demo}
+        en \ruta{AdminDashboardView.tsx}.
+  \item Reinicie el servidor (\texttt{npm run dev}) o vuelva a compilar
+        (\texttt{npm run build}) para que los cambios surtan efecto.
+\end{enumerate}
+
+% ============================================================================
+\section{Consideraciones de seguridad}\label{sec:seguridad}
+
+La autenticación actual es una \textbf{simulación para demostración}. Antes de usar la
+aplicación con datos reales o exponerla en Internet considere lo siguiente:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Las credenciales viajan en el frontend.} \ruta{src/config/auth.ts} se
+        incluye en el JavaScript que descarga el navegador. La ofuscación dificulta
+        leerlo, pero no lo impide.
+  \item \textbf{Validación de respaldo en el cliente.} Si el servidor rechaza el login,
+        \texttt{authenticateUser} vuelve a validar localmente en el navegador; por lo
+        tanto la decisión final de acceso ocurre en el cliente.
+  \item \textbf{Token simulado.} El servidor responde con un token del tipo
+        \texttt{mock-<id>} que no se verifica en ningún endpoint; la API no exige
+        autenticación.
+  \item \textbf{Las pistas de contraseña} están visibles en la pantalla de login.
+  \item \textbf{Sin persistencia.} Usuarios, historial y tareas se reinician al recargar
+        la página o reiniciar el servidor.
+\end{itemize}
+
+\begin{nota}[Siguiente paso sugerido]
+El propio código deja preparado el camino para conectar un proveedor de autenticación
+real y una base de datos (las respuestas de la API mencionan Firebase Auth y
+PostgreSQL). Lo recomendable es: mover usuarios y contraseñas (con \emph{hash}) a una
+base de datos, eliminar la validación de respaldo del frontend, emitir tokens firmados y
+verificar el rol en cada endpoint del servidor.
+\end{nota}
+
+% ============================================================================
+\section{API REST del servidor}
+
+Todas las rutas están en \ruta{server.ts} y responden JSON.
+
+\begin{center}
+\rowcolors{2}{salight}{white}
+\begin{tabularx}{\linewidth}{llX}
+\toprule
+\textbf{Método} & \textbf{Ruta} & \textbf{Descripción} \\
+\midrule
+GET  & \texttt{/api/v1/health}            & Estado del servicio \\
+POST & \texttt{/api/v1/auth/login}        & Login con \texttt{\{email, password\}} \\
+GET  & \texttt{/api/v1/reports}           & Informes; filtro opcional \texttt{?clientId=} \\
+GET  & \texttt{/api/v1/perfmon/counters}  & Contadores de ejemplo; \texttt{?module=SII|TGR} \\
+GET  & \texttt{/api/v1/perfmon/alerts}    & Alertas de ejemplo; \texttt{?module=SII|TGR} \\
+GET  & \texttt{/api/v1/perfmon/history}   & Historial inicial \\
+POST & \texttt{/api/v1/perfmon/analyze}   & Análisis simulado (datos de ejemplo) \\
+POST & \texttt{/api/v1/perfmon/thresholds}& Recibe la configuración de umbrales (sin persistir) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{nota}
+El análisis real de los CSV ocurre en el navegador
+(\ruta{procesadorCsv.ts}); los endpoints \texttt{perfmon/*} devuelven datos simulados de
+\ruta{datosSimulados.ts} y sirven como contrato para un futuro backend.
+\end{nota}
+
+% ============================================================================
+\section{Estructura del proyecto y puntos de personalización}\label{sec:estructura}
+
+\begin{lstlisting}
+SyA-hub/
+|-- server.ts                 Servidor Express + API REST
+|-- index.html                HTML base (titulo y favicon)
+|-- vite.config.ts            Configuracion de Vite y ofuscacion
+|-- public/S&A.svg            Favicon / logotipo
+|-- docs/                     Este manual
+`-- src/
+    |-- App.tsx               Navegacion principal y reglas de rol
+    |-- types.ts              Tipos User, Role, ReportItem
+    |-- config/auth.ts        Usuarios e informes de demostracion
+    |-- core/auth.ts          Login y obtencion de informes (cliente)
+    |-- components/ui/        Barra superior y pie de pagina
+    |-- views/                Login, Hub, Historial, Tareas, Admin, Portal cliente
+    `-- modules/analizador-rendimiento/
+        |-- VistaAnalizadorRendimiento.tsx
+        |-- components/       Grafico, alertas, modales, seleccion de modulo
+        |-- hooks/            Logica de carga, repositorio local y estado
+        |-- utils/            Parser CSV y detector de umbrales
+        |-- data/             Datos simulados y umbrales por defecto
+        `-- types/            Tipos del analizador
+\end{lstlisting}
+
+\begin{center}
+\rowcolors{2}{salight}{white}
+\begin{tabularx}{\linewidth}{Xl}
+\toprule
+\textbf{Quiero cambiar\ldots} & \textbf{Archivo} \\
+\midrule
+Usuarios, roles iniciales e informes de clientes & \ruta{src/config/auth.ts} \\
+Regla de contraseñas            & \ruta{server.ts} y \ruta{src/core/auth.ts} \\
+Puerto del servidor             & \ruta{server.ts} (\texttt{PORT}) \\
+Umbrales por defecto            & \ruta{.../data/datosSimulados.ts} \\
+Reglas de alerta                & \ruta{.../utils/detectorUmbrales.ts} \\
+Contadores Perfmon reconocidos  & \ruta{.../utils/procesadorCsv.ts} \\
+Textos del Hub / tarjetas       & \ruta{src/views/InicioVista.tsx} \\
+Descripción de módulos SII/TGR  & \ruta{.../components/SeleccionModulo.tsx} \\
+Colores corporativos            & Clases Tailwind (p.\,ej. \texttt{\#002395}) en cada vista \\
+Título de pestaña y favicon     & \ruta{index.html}, \ruta{public/S\&A.svg} \\
+Nivel de ofuscación del build   & \ruta{vite.config.ts} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+% ============================================================================
+\section{Solución de problemas}
+
+\begin{description}[leftmargin=*,style=nextline]
+  \item[El puerto 3000 está ocupado] Cierre el otro proceso o cambie \texttt{PORT} en
+        \ruta{server.ts}.
+  \item[\texttt{npm run dev} muestra una versión antigua] Existe \ruta{dist/}; ejecute
+        \texttt{npm run clean}.
+  \item[``El archivo CSV no contiene contadores válidos''] El CSV no incluye ninguno de
+        los contadores reconocidos, o es un \texttt{.blg} sin convertir.
+  \item[``Contraseña incorrecta''] Revise la tabla de la sección~\ref{sec:credenciales};
+        si cambió la regla, verifique que \ruta{server.ts} y \ruta{src/core/auth.ts}
+        coincidan.
+  \item[Los usuarios creados desaparecieron] Es el comportamiento esperado: se guardan
+        solo en memoria (ver sección~\ref{sec:seguridad}).
+\end{description}
+
+\end{document}

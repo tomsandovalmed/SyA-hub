@@ -7,7 +7,7 @@ import {
   ItemHistorialOperacion,
   ConfiguracionUmbrales,
 } from "./modules/analizador-rendimiento/types/tiposAnalizador";
-import { initialOperationHistory } from "./modules/analizador-rendimiento/data/datosSimulados";
+import { initialOperationHistory, initialThresholds } from "./modules/analizador-rendimiento/data/datosSimulados";
 import { analizarContadores } from "./modules/analizador-rendimiento/utils/detectorUmbrales";
 import { TopNavBar } from "./components/ui/TopNavBar";
 import { InicioVista } from "./views/InicioVista";
@@ -21,21 +21,6 @@ import { ClientReportsView } from "./views/ClientReportsView";
 import { AdminDashboardView } from "./views/AdminDashboardView";
 import type { User } from "./types";
 
-// ============================================================================
-// CONFIGURACIÓN DE UMBRALES DE RESPALDO (S&A CHILE STANDARDS)
-// ============================================================================
-const defaultThresholds: ConfiguracionUmbrales = {
-  limitePaginasMemoriaPorSeg: 20,
-  avisoCpu: 50,
-  criticoCpu: 80,
-  proporcionAciertoCacheOLTP: 95,
-  proporcionAciertoCacheOLAP: 80,
-  limiteCompilacionesSqlPorSeg: 100,
-  limiteBloqueosPorSeg: 1000,
-  avisoBuffer: 95,
-  criticoBuffer: 80,
-};
-
 export default function App() {
   // ==========================================
   // ESTADOS PRINCIPALES DE LA APLICACIÓN
@@ -43,7 +28,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<ModoVista>("hub");
   const [selectedModule, setSelectedModule] = useState<TipoModulo>("SII");
   const [authUser, setAuthUser] = useState<User | null>(null);
-  const [thresholdConfig, setThresholdConfig] = useState<ConfiguracionUmbrales>(defaultThresholds);
+  const [thresholdConfig, setThresholdConfig] = useState<ConfiguracionUmbrales>(initialThresholds);
   const [history, setHistory] = useState<ItemHistorialOperacion[]>(initialOperationHistory);
 
   // 🟢 ESTADO INICIAL VACÍO PARA CONTADORES Y ALERTAS
@@ -53,12 +38,6 @@ export default function App() {
   // ==========================================
   // MANEJADORES DE CAMBIO DE MÓDULO Y NAVEGACIÓN
   // ==========================================
-
-  const handleModuleChange = (module: TipoModulo) => {
-    setSelectedModule(module);
-    setCounters([]);
-    setAlerts([]);
-  };
 
   const handleSelectModule = (module: TipoModulo) => {
     setSelectedModule(module);
@@ -146,7 +125,6 @@ export default function App() {
       {/* Header & Barra de Navegación */}
       <TopNavBar
         currentView={currentView}
-        selectedModule={selectedModule}
         authUser={authUser}
         onNavigate={(view) => setCurrentView(view)}
         onLogout={handleLogout}
@@ -173,7 +151,7 @@ export default function App() {
           <NotasYTareas onNavigate={(view) => setCurrentView(view)} />
         )}
 
-          {currentView === "module-select" && (
+        {currentView === "module-select" && (
           <SeleccionModulo
             onSelectModule={(mod) => handleSelectModule(mod)}
             onNavigate={(view) => setCurrentView(view)}
@@ -183,7 +161,6 @@ export default function App() {
         {currentView === "analyzer" && (
           <VistaAnalizadorRendimiento
             selectedModule={selectedModule}
-            onChangeModule={(mod) => handleModuleChange(mod)}
             counters={counters}
             alerts={alerts}
             thresholdConfig={thresholdConfig}
@@ -193,7 +170,7 @@ export default function App() {
           />
         )}
 
-        {currentView === "admin" && authUser && (
+        {currentView === "admin" && authUser.role === "ADMIN" && (
           <AdminDashboardView user={authUser} onNavigate={(view) => setCurrentView(view)} />
         )}
       </main>

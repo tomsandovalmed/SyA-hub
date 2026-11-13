@@ -1,17 +1,16 @@
 import React, { useMemo, useState } from 'react';
-import { ModoVista, TipoModulo } from '../../modules/analizador-rendimiento/types/tiposAnalizador';
+import type { ModoVista } from '../../modules/analizador-rendimiento/types/tiposAnalizador';
 import { Bell, Settings, LayoutGrid, Clock, CheckSquare, ChevronDown, LogOut, UserCircle } from 'lucide-react';
 import type { User } from '../../types';
 
 interface TopNavBarProps {
   currentView: ModoVista;
-  selectedModule: TipoModulo;
   authUser: User;
   onNavigate: (view: ModoVista) => void;
   onLogout: () => void;
 }
 
-export const TopNavBar: React.FC<TopNavBarProps> = ({ currentView, selectedModule, authUser, onNavigate, onLogout }) => {
+export const TopNavBar: React.FC<TopNavBarProps> = ({ currentView, authUser, onNavigate, onLogout }) => {
   const [profileOpen, setProfileOpen] = useState(false);
 
   const initials = useMemo(() => {
@@ -59,9 +58,9 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({ currentView, selectedModul
             </button>
 
             <button
-              onClick={() => onNavigate('history' as ViewMode)}
+              onClick={() => onNavigate('history')}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-                currentView === ('history' as ViewMode)
+                currentView === ('history')
                   ? 'text-[#002395] bg-blue-50 font-bold border-b-2 border-[#002395]'
                   : 'text-gray-600 hover:text-[#002395] hover:bg-gray-50'
               }`}
@@ -71,9 +70,9 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({ currentView, selectedModul
             </button>
 
             <button
-              onClick={() => onNavigate('tasks' as ViewMode)}
+              onClick={() => onNavigate('tasks')}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-                currentView === ('tasks' as ViewMode)
+                currentView === ('tasks')
                   ? 'text-[#002395] bg-blue-50 font-bold border-b-2 border-[#002395]'
                   : 'text-gray-600 hover:text-[#002395] hover:bg-gray-50'
               }`}
@@ -84,9 +83,9 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({ currentView, selectedModul
 
             {authUser.role === 'ADMIN' && (
               <button
-                onClick={() => onNavigate('admin' as ViewMode)}
+                onClick={() => onNavigate('admin')}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-                  currentView === ('admin' as ViewMode)
+                  currentView === ('admin')
                     ? 'text-[#002395] bg-blue-50 font-bold border-b-2 border-[#002395]'
                     : 'text-gray-600 hover:text-[#002395] hover:bg-gray-50'
                 }`}
